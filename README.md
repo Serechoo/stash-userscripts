@@ -1,4 +1,4 @@
-# stash-userscripts
+# Batch Create All - Stash
 This is a code to allow batch create jobs for your stash. 
 
 The idea behind it is this: Once you have the userscripts for 'Batch Search' installed, you can then look to click the 'Create All' button that is installed via this javascript. 
