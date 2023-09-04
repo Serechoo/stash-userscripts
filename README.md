@@ -7,4 +7,5 @@ The idea behind it is this: Once you have the userscripts for 'Search All' insta
 of the container of the 'Create' button, and only click it if the placeholder text is 'Select Performer' or 'Select Studio'...otherwise, it will skip that Create button and move on to the next.
 
 **Known bug currently**: Please refresh the page when you get to the Tagger view in the 'Scenes' page. This should load the 'Create All' button.
+
 **Please note:** This script has only been tested in Chrome and in conjunction with the Neon Dark theme. Since it does target specific elements within the theme, it may have to be modified/generalized to work with other themes.
