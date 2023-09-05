@@ -1,4 +1,4 @@
-# Batch Create All - Stash
+# Batch Create All - Stash 0.1
 This is a code to allow batch create jobs for your stash. 
 
 The idea behind it is this: Once you have the userscripts for 'Search All' installed and click it, you can then look to click the 'Create All' button that is installed via this javascript. 
@@ -12,3 +12,12 @@ The idea behind it is this: Once you have the userscripts for 'Search All' insta
 Credit for the button template and other great scripts to:
 
 https://github.com/7dJx1qP/stash-userscripts
+
+
+# Batch Create All - Stash 0.2
+
+Added logic to the script to attempt to handle performers and studios that have already been created. There was a prior iteration of this script, but it would stop abruptly on the first new 'Create' button if a performer or studio was not present. That should now be fixed.
+
+This script will skip scenes which already have the performer and studios detected, and should only interact with 'Create' buttons which have the default placeholder texts of 'Select Studio' or 'Select Performer' and click the 'Create' and 'Save' buttons accordingly.
+
+This will not click the 'Save All' button, and let the user review the added Performers and Studios before committing the change.
