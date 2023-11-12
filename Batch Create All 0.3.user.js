@@ -1,17 +1,14 @@
 // ==UserScript==
 // @name         Batch Create All 0.3
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.3.1
 // @description  Adds a 'Create All' button much like the 'Search All' button that interacts with all create buttons. The idea is to run the 'Search All' button first, and then run this one.
 // @author       Serechoo
 // @match        http://localhost:9999/scenes?*disp=3*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=undefined.localhost
 // @grant        unsafeWindow
-// @grant        GM_setClipboard
-// @grant        GM_getResourceText
 // @grant        GM_addStyle
-// @grant        GM.getValue
-// @grant        GM.setValue
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @connect      localhost
 // ==/UserScript==
 
@@ -19,9 +16,6 @@
     'use strict';
 
     console.log("Script started"); // Debugging statement
-
-    const DEFAULT_DELAY = 500; // Set your desired delay in milliseconds
-    let delay = DEFAULT_DELAY;
 
     // Add the following styles
     GM_addStyle(`
@@ -79,13 +73,9 @@
 
     const {
         stash,
-        Stash,
-        waitForElementId,
-        waitForElementClass,
         waitForElementByXpath,
         getElementByXpath,
         sortElementChildren,
-        createElementFromHTML,
     } = unsafeWindow.stash;
 
     let running = false;
@@ -118,7 +108,7 @@
     async function run() {
         if (!running) return;
 
-        const createButtons = document.querySelectorAll('.btn-group');
+        const createButtons = document.querySelectorAll('.search-result .btn-group');
         const tagButtons = document.querySelectorAll('button.minimal.ml-2.btn.btn-primary');
         maxCreateCount = createButtons.length;
         maxTagCount = tagButtons.length;
@@ -136,36 +126,36 @@
             const startTime = performance.now();
 
             for (const button of buttons) {
-                if (selectPlaceholder && (selectPlaceholder.textContent.trim() === 'Select Performer' || selectPlaceholder.textContent.trim() === 'Select Studio')) {
-                    if (!button.disabled && button.textContent.trim() === 'Create') {
-                        button.click();
-                        await delayAction(500); // Wait for 500ms
+                const selectText = selectPlaceholder?.textContent?.trim();
+                const buttonText = button?.textContent?.trim();
+                if (!['Select Performer', 'Select Studio'].includes(selectText)) continue;
+                if (button.disabled || buttonText !== 'Create') continue;
+                button.click();
+                await delayAction(delay); // Wait for 500ms
 
-                        // Add your interaction logic here for the 'Create' button, if needed.
-                        // For example, fill out a form or perform actions.
+                // Add your interaction logic here for the 'Create' button, if needed.
+                // For example, fill out a form or perform actions.
 
-                        // Click the 'Save' button in the modal footer of the new window
-                        const saveButton = document.querySelector('.ModalFooter.modal-footer button.btn.btn-primary');
-                        if (saveButton) {
-                            saveButton.click();
-                            await delayAction(500); // Wait for 500ms
-                            // Add your interaction logic here for the 'Save' button in the new window.
-                        }
-
-                        const elapsedTime = performance.now() - startTime;
-                        totalElapsedTimeCreate += elapsedTime;
-
-                        completedCreateCount++;
-
-                        const progressCreate = completedCreateCount / maxCreateCount * 100;
-                        stash.setProgress(progressCreate);
-
-                        // Update modal content for 'Create'
-                        const remainingTimeCreate = calculateRemainingTime(completedCreateCount, maxCreateCount, totalElapsedTimeCreate);
-                        const etaCreate = formatTime(remainingTimeCreate);
-                        updateModalContent(progressCreate, etaCreate);
-                    }
+                // Click the 'Save' button in the modal footer of the new window
+                const saveButton = document.querySelector('.ModalFooter.modal-footer button.btn.btn-primary');
+                if (saveButton) {
+                    saveButton.click();
+                    await delayAction(delay); // Wait for 500ms
+                    // Add your interaction logic here for the 'Save' button in the new window.
                 }
+
+                const elapsedTime = performance.now() - startTime;
+                totalElapsedTimeCreate += elapsedTime;
+
+                completedCreateCount++;
+
+                const progressCreate = completedCreateCount / maxCreateCount * 100;
+                stash.setProgress(progressCreate);
+
+                // Update modal content for 'Create'
+                const remainingTimeCreate = calculateRemainingTime(completedCreateCount, maxCreateCount, totalElapsedTimeCreate);
+                const etaCreate = formatTime(remainingTimeCreate);
+                updateModalContent(progressCreate, etaCreate);
             }
         }
 
@@ -221,12 +211,8 @@
     btn.classList.add('btn', 'btn-primary', 'ml-3');
     btn.innerHTML = startLabel;
     btn.onclick = () => {
-        if (running) {
-            stop();
-        }
-        else {
-            start();
-        }
+        if (running) stop();
+        else start();
     };
 
     function start() {
@@ -257,7 +243,7 @@
         });
     });
 
-    stash.addEventListener('tagger:mutations:header', evt => {
+    stash.addEventListener('tagger:mutations:header', () => {
         const el = getElementByXpath("//button[text()='Scrape All']");
         if (el && !document.getElementById(btnId)) {
             const container = el.parentElement;
@@ -270,24 +256,20 @@
     const batchSearchConfigId = 'batch-create-config'; // Change the config ID
 
     async function loadSettings() {
-        delay = parseInt(await GM.getValue('batch-create-delay', DEFAULT_DELAY));
+        delay = parseInt(await GM_getValue('batch-create-delay', DEFAULT_DELAY));
         const input = document.querySelector(`#${batchSearchConfigId} input[type="text"]`);
         input.value = delay;
         input.addEventListener('change', async () => {
             let value = parseInt(input.value.trim())
-            if (isNaN(value)) {
-                value = DEFAULT_DELAY;
-            }
+            value = isNaN(value) ? DEFAULT_DELAY : value;
             input.value = value;
             delay = value;
-            await GM.setValue('batch-create-delay', value);
+            await GM_setValue('batch-create-delay', value);
         });
     }
 
     // Function to delay actions
-    async function delayAction(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    const delayAction = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     loadSettings();
 })();
