@@ -21,3 +21,9 @@ Added logic to the script to attempt to handle performers and studios that have 
 This script will skip scenes which already have the performer and studios detected, and should only interact with 'Create' buttons which have the default placeholder texts of 'Select Studio' or 'Select Performer' and click the 'Create' and 'Save' buttons accordingly.
 
 This will not click the 'Save All' button, and let the user review the added Performers and Studios before committing the change.
+
+# Batch Create All - Stash 0.3
+
+Included the functionality to batch add any outstanding tags on the page.
+
+Implemented a basic progress tracker of the overall task that will show as a percentage completion bar and give an estimated time until completion.
