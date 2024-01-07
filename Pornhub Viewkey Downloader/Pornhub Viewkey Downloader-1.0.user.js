@@ -3,7 +3,7 @@
 // @namespace    https://www.github.com/Serechoo/stash-userscripts
 // @version      1.0
 // @description  Add visual cues to video links with viewkey and collect them for download with yt-dl
-// @author       Your Name
+// @author       Serechoo
 // @match        https://www.pornhub.com/*
 // @grant        GM_setClipboard
 // ==/UserScript==
