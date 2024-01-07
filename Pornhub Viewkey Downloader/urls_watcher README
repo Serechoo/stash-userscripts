@@ -1,0 +1,34 @@
+URLs_Watcher
+Description
+The URLs.txt Watcher is a Python script designed to monitor a specified directory for the creation of a file named urls.txt. Upon detection of this file, it automatically moves it to another predefined destination directory. This functionality is particularly useful when integrated with applications that generate or update urls.txt files regularly, such as video downloaders like yt-dlp.
+
+Requirements
+Python installed on your system (3.x recommended).
+Required Python modules:
+watchdog (to monitor file system events).
+Installation
+1. Install Required Modules
+Ensure you have the necessary Python modules installed. If you haven't already installed the watchdog module, execute the following command in your terminal or command prompt:
+
+bash
+Copy code
+pip install watchdog
+2. Configure the Script
+Adjust the script variables to match your setup:
+
+directory_to_watch: Set this variable to the directory path that you want to monitor for the urls.txt file.
+destination_path: Define the destination directory path where you want the urls.txt file to be moved.
+3. Running the Script
+Run the Python script by executing it via the terminal or command prompt:
+
+bash
+Copy code
+python urls_watcher.py
+Note: Replace urls_watcher.py with the actual filename if you've saved the script with a different name.
+
+Usage
+Once the script is running, it will continuously monitor the specified directory for the creation of urls.txt.
+When a urls.txt file is created in the monitored directory, the script will wait for the specified delay (default 2 seconds) before moving it to the defined destination directory.
+The script will display a console message indicating the movement of the urls.txt file.
+Important Notes
+Ensure the Python script is running continuously to monitor the directory for changes. You may keep the script running in the background or set it up to run as a scheduled task, depending on your requirements.
