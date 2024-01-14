@@ -1,0 +1,461 @@
+/* Glassy - A Window To Your Collection */
+/* General Styling */
+
+/* Common Styles */
+* {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Header Style */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+}
+
+p {
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8); /* Adjust the alpha value for text transparency */
+}
+
+/* Change cursor to pointer on hover for clickable elements */
+
+.movie-card-image
+cursor: pointer;
+
+/* Nav Button Effects */
+.nav-item:hover {
+  opacity: 0.8;
+}
+
+.nav-item:active {
+  transform: scale(0.8); /* Example: Apply scale transformation on click */
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+
+  .logo {
+    font-size: 12px;
+  }
+
+  .card {
+    padding: 8px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-description {
+    font-size: 12px;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+/* Stylized Settings - Anything with the "embossed"/white shadow around the card */
+li.row.mx-0.mt-2.search-result,
+li.row.mx-0.mt-2.search-result.selected-result.active,
+div.mt-3.search-item,
+div.changelog-version.card,
+.scene-card.zoom-1.grid-card.card,
+.performer-card.grid-card.card,
+.movie-card.grid-card.card,
+.studio-card.grid-card.card,
+.div.card,
+.tasks-panel,
+.setting-section,
+.flex-column.nav.nav-pills {
+  background: rgba(0, 0, 0, 0.4); /* Darker background for dark mode, adjust opacity as needed */
+  color: #fff; /* Text color for dark mode */
+  border-radius: 10px; /* Adjust the border-radius for rounded corners */
+  padding: 20px; /* Adjust the padding as needed */
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1), 0 0 10px rgba(255, 255, 255, 0.1); /* Raised embossed effect */
+}
+
+/* Popup Modal Styling - Settings Section - General "Dark Themed Glassy Look" */
+button.btn.btn-secondary,
+.job-table.card,
+div.tagger-container.mx-md-auto,
+button.btn.btn-primary,
+div.card,
+div.setting,
+div.collapsible-section.collapse.show,
+div.setting-group.collapsible,
+div.wall.w-100.row.justify-content-center,
+div.changelog-version-body.markdown.collapse.show,
+div.markdown,
+div.modal-header,
+div.modal-footer,
+div.modal-body,
+div.modal-content {
+  background: rgba(0, 0, 0, 0.3); /* Darker background for dark mode, adjust opacity as needed */
+}
+
+/* Additional styling for text inside the containers - Helping Readability */
+.tasks-panel-queue h2,
+.setting-section h2,
+.flex-column.nav.nav-pills h2,
+.div.card h2 {
+  color: #ffcc00; /* Adjust the text color for headings in dark mode */
+}
+
+.tasks-panel-queue p,
+.setting-section p,
+.flex-column.nav.nav-pills p,
+.div.card p {
+  color: #ddd; /* Adjust the text color for paragraphs in dark mode */
+}
+
+/* Scrollbar Modification */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Navigation Bar Styling */
+nav.bg-dark {
+  background: rgba(10, 20, 25, 0.50) !important;
+}
+
+.bg-dark {
+  background: none !important;
+  background-color: none !important;
+}
+
+.form-group .bg-dark {
+  background: rgba(10, 20, 25, 0.20) !important;
+}
+
+.navbar-buttons.navbar-nav a.nav-utility {
+  margin-right: 9px;
+}
+
+/* Animation for Scene, Performer, and Studio Cards on Main Page */
+@keyframes scrollLeftToRight {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(-200%);
+    }
+}
+
+/*Target the Specific Slick Tracks to Animate and Include a Pause on Hover*/
+
+.movie-recommendations .slick-track,
+.scene-recommendations .slick-track,
+.performer-recommendations .slick-track,
+.studio-recommendations .slick-track {
+    animation: scrollLeftToRight 4800s linear infinite;
+    white-space: nowrap;
+    overflow: hidden;
+    animation-play-state: running;
+}
+
+.scene-recommendations:hover .slick-track,
+.performer-recommendations:hover .slick-track,
+.studio-recommendations:hover .slick-track,
+.movie-recommendations:hover .slick-track {
+    animation-play-state: paused;
+}
+
+/*Main Page - Blur Other Cards That Are Not Moused Over*/
+
+.movie-recommendations .slick-track:hover .movie-card.grid-card.card:not(:hover),
+.scene-recommendations .slick-track:hover .scene-card.zoom-1.grid-card.card:not(:hover),
+.performer-recommendations .slick-track:hover .performer-card.grid-card.card:not(:hover),
+.studio-recommendations .slick-track:hover .studio-card.grid-card.card:not(:hover) {
+  filter: blur(2px);
+}
+
+/* Hide slick-dots element on Main Page - Less Clutter */
+.slick-dots {
+  display: none !important;
+}
+
+/*Hide the Prev-Next Arrows on Main Page*/
+.slick-arrow.slick-prev,
+.slick-arrow.slick-next {
+  display: none !important;
+  width: 0 !important;
+  margin: 0 !important;
+}
+
+/* CSS for Highlighting Cards on Mouseover - Vertical Wipe Effect */
+.grid-card.card {
+  position: relative;
+  transition: border 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+  border-radius: 10px;
+}
+.movie-card.grid-card.card {
+    position: relative;
+}
+
+.studio-card.grid-card.card::before,
+.movie-card.grid-card.card::before,
+.grid-card.card.zoom-1::before,
+.performer-card.grid-card.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 50%, rgba(255, 255, 255, 0.5) 150%);
+    background-size: 100% 200%;
+    transition: background-position 0.5s ease;
+    z-index: -1; /* Set a lower z-index for the pseudo-element */
+}
+
+
+.grid-card.card.zoom-1:hover::before,
+.performer-card.grid-card.card:hover::before,
+.movie-card.grid-card.card:hover::before,
+.studio-card.grid-card.card:hover::before {
+  background-position: 0 -100%;
+}
+
+/*This generates the white border around the cards on hover and makes them "pop" with a subtle transform */
+
+.grid-card.card:hover {
+  border: 2.5px solid #fff;
+  transform: scale(1.01);
+  overflow: hidden;
+  filter: blur(0);
+}
+
+
+
+
+/* Background Studio Grey Banners -- Better Readability */
+.studio-card-image {
+  background-color: rgba(26, 26, 26, 0.6);
+}
+
+/* Centering in .card-section */
+.card-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Glassy Translucent Effect for .scene-card__date and .performer-card__age */
+.scene-card__date,
+.performer-card__age {
+  background-color: rgba(173, 216, 230, 0.12);
+}
+
+/* Global Changes */
+
+/*Hide Donate Button*/
+.btn-primary.btn.donate.minimal {
+  display: none;
+}
+
+/* Table Styling - Scene View Option of List/Table - Eliminates Tags and a few other columns (e.g favorites...)*/
+.table {
+  width: calc(100% + (300px + 300px + 300px + 300px));
+  border-collapse: collapse;
+}
+
+.table td:nth-child(4),
+.table th:nth-child(4),
+.table td:nth-child(6),
+.table th:nth-child(6),
+.table td:nth-child(9),
+.table th:nth-child(9),
+.table td:nth-child(10),
+.table th:nth-child(10) {
+  display: none;
+}
+
+.table-striped-bordered {
+  width: 50%;
+}
+
+/* Scenes Tab Styling */
+.scenes-tab {
+  padding: 0px !important;
+}
+
+/* Studios Tab Styling */
+.studios-tab {
+  width: 15%;
+}
+
+/* Performers Tab Styling */
+.performer-image {
+  background-size: contain !important;
+}
+
+.performer-container,
+.col-md-8 {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+.performer-image {
+  height: 45rem;
+  min-width: 15rem;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Add a background image to the existing background container */
+body {
+  background-image: url('https://erowall.com/wallpapers/original/24186.jpg');
+  background-size: contain;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Create the parallax effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: inherit;
+  transform: translateZ(-1px) scale(1.5);
+}
+
+/* Styling for Glassy Translucent Effect */
+.studio-card-image,
+.video-section .thumbnail-section,
+.card-section .performer-card-image,
+.card-section .studio-card-image,
+.card-section .movie-card-image {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.studio-image {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+.wall-item {
+    border: 1px solid rgba(0, 0, 0, 0); /* 1px solid black border with 50% transparency */
+}
+
+.btn.btn-primary {
+    border: 1px solid rgba(50, 50, 50, 0.5); /* 1px solid dark grey border with 50% transparency */
+}
+
+/* Muted Green Borders for .tasks-panel-queue */
+.tasks-panel-queue {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Glow effect */
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid #77dd77; /* Muted green border color */
+    border-radius: 15px; /* Adjust the border-radius for rounded corners */
+    margin: 10px 0; /* Add some margin for spacing */
+    padding: 10px; /* Add padding to the container */
+}
+
+
+/* [Gallery tab] Hides the lightbox header and footer to make the image area larger. Mouse reveals them as an overlay to the image*/
+
+.Lightbox-header,
+.Lightbox-footer{
+z-index:9999;
+ position:absolute;
+ width:100%;
+ opacity:0;
+background-color:#0008;
+ transition: opacity 0.5s ease;
+}
+
+.Lightbox-footer{
+bottom:0;}
+
+.Lightbox-navbutton{
+opacity:0;
+transition: opacity 0.5s ease;
+}
+
+
+.Lightbox-navbutton:hover,
+.Lightbox-header:hover,
+.Lightbox-footer:hover{
+opacity:1;
+}
+
+
+/* Resize preview button on Images and put them in top left */
+ 
+.preview-button
+.preview-button .btn.btn-primary {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scale(0.5);
+}
+
+
+/* Magnify Button Hover Effect - Shows a magnify button in the middle of the card on hover */
+.fa-icon {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    transition: transform 0.2s ease-in-out;
+}
+
+.fa-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Transparent Preview Placeholder in Magnifying Glass - Refactoring The Behaviour and Appearance of the Magnifying Glass */
+.preview-button .btn.btn-primary {
+    background-color: rgba(0, 0, 0, 0); /* Full transparent background */
+    /* Add any other styling as needed */
+}
+
+/* [Images tab] Don't crop preview thumbnails */
+
+.flexbin > * > img {
+  object-fit: inherit;
+  max-width: none;
+  min-width: initial;
+}
+
+/* Main Page - Animate Headers - Vertical Fade-in effect */
+
+@keyframes textAnimation {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.recommendation-row-head h2 {
+    margin: 0;
+    text-align: center;
+    animation: textAnimation 1s ease-in-out; /* Adjust the animation duration and timing function as needed */
+}
+
