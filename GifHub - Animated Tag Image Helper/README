@@ -1,0 +1,25 @@
+# Pornhub GIF Scraper
+
+This Python script allows you to scrape GIF links from Pornhub based on a given search term. The script generates an HTML gallery that you can view in your browser.
+
+## Prerequisites
+
+Make sure you have the following installed:
+
+- Python 3
+- BeautifulSoup4
+- Requests
+
+You can install the required dependencies using:
+
+```bash
+pip install beautifulsoup4 requests
+
+1. Clone the repository
+git clone https://github.com/your-username/pornhub-gif-scraper.git
+
+2. Navigate to the project directory
+cd pornhub-gif-scraper
+
+3. Run the Script
+python GifHub.py
