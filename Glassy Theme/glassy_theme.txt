@@ -79,6 +79,8 @@ div.changelog-version.card,
 }
 
 /* Popup Modal Styling - Settings Section - General "Dark Themed Glassy Look" */
+.background-image-container,
+.detail-header.full-width,
 button.btn.btn-secondary,
 .job-table.card,
 div.tagger-container.mx-md-auto,
@@ -303,25 +305,7 @@ nav.bg-dark {
   width: 15%;
 }
 
-/* Performers Tab Styling */
-.performer-image {
-  background-size: contain !important;
-}
 
-.performer-container,
-.col-md-8 {
-  flex: 0 0 100%;
-  max-width: 100%;
-}
-
-.performer-image {
-  height: 45rem;
-  min-width: 15rem;
-  background-size: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* Add a background image to the existing background container */
 body {
@@ -462,3 +446,6 @@ opacity:1;
     animation: textAnimation 1s ease-in-out; /* Adjust the animation duration and timing function as needed */
 }
 
+.background-image-container > picture {
+  display: none;
+}
