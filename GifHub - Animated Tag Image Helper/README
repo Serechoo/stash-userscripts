@@ -12,14 +12,4 @@ Make sure you have the following installed:
 
 You can install the required dependencies using:
 
-```bash
 pip install beautifulsoup4 requests
-
-1. Clone the repository
-git clone https://github.com/your-username/pornhub-gif-scraper.git
-
-2. Navigate to the project directory
-cd pornhub-gif-scraper
-
-3. Run the Script
-python GifHub.py
