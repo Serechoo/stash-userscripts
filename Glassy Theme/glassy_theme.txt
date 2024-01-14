@@ -151,7 +151,7 @@ nav.bg-dark {
         transform: translateX(0);
     }
     50% {
-        transform: translateX(-100%);
+        transform: translateX(-200%);
     }
 }
 
@@ -161,18 +161,21 @@ nav.bg-dark {
 .scene-recommendations .slick-track,
 .performer-recommendations .slick-track,
 .studio-recommendations .slick-track {
-    animation: scrollLeftToRight 2400s linear infinite;
+    animation: scrollLeftToRight 4800s linear infinite;
     white-space: nowrap;
     overflow: hidden;
     animation-play-state: running;
 }
 
-.scene-recommendations:hover .slick-track,
-.performer-recommendations:hover .slick-track,
-.studio-recommendations:hover .slick-track,
-.movie-recommendations:hover .slick-track {
+.movie-recommendations .slick-track:hover,
+.scene-recommendations .slick-track:hover,
+.performer-recommendations .slick-track:hover,
+.studio-recommendations .slick-track:hover {
     animation-play-state: paused;
 }
+
+
+
 
 /*Main Page - Blur Other Cards That Are Not Moused Over*/
 
