@@ -151,7 +151,7 @@ nav.bg-dark {
         transform: translateX(0);
     }
     50% {
-        transform: translateX(-200%);
+        transform: translateX(-100%);
     }
 }
 
@@ -161,7 +161,7 @@ nav.bg-dark {
 .scene-recommendations .slick-track,
 .performer-recommendations .slick-track,
 .studio-recommendations .slick-track {
-    animation: scrollLeftToRight 4800s linear infinite;
+    animation: scrollLeftToRight 2400s linear infinite;
     white-space: nowrap;
     overflow: hidden;
     animation-play-state: running;
