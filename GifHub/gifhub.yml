@@ -4,22 +4,23 @@ version: 0.1
 url: https://raw.githubusercontent.com/Serechoo/stash-userscripts/main/GifHub%20-%20Animated%20Tag%20Image%20Helper
 exec:
   - python
-  - "{pluginDir}/GifHub.py"
+  - plugins/GifHub/GifHub.py
 interface: raw
 settings:
   tag_name:
     displayName: Tag Name
     description: Enter the tag name for GIF search
     type: STRING
-    
+
+tasks:
+  - name: SearchAndGenerateGallery
+    description: Scrape GIF links from Pornhub and generate an HTML gallery.
+    defaultArgs:
+      mode: "default"
+
 hooks:
   - name: TagUpdate
     description: Update tag with GIF
     triggeredBy:
       - Scene.Update.Post
       
-tasks:
-  - name: SearchAndGenerateGallery
-    description: Scrape GIF links from Pornhub and generate an HTML gallery.
-    defaultArgs:
-      mode: "default"
