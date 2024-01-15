@@ -1,4 +1,4 @@
-name: Gif Hub
+name: Gif-Hub
 description: This Python script allows you to scrape GIF links from Pornhub based on a given search term. The script generates an HTML gallery that you can view in your browser.
 version: 0.1
 url: https://raw.githubusercontent.com/Serechoo/stash-userscripts/main/GifHub%20-%20Animated%20Tag%20Image%20Helper
