@@ -1,4 +1,5 @@
 ---
+name: Gif-Hub
 description: This Python script allows you to scrape GIF links from Pornhub
   based on a given search term. The script generates an HTML gallery that you
   can view in your browser.
@@ -21,4 +22,5 @@ tasks:
 hooks:
   - name: TagUpdate
     description: Update tag with GIF
-    triggeredBy: Scene.Update.Post
+    triggeredBy:
+      - Scene.Update.Post
