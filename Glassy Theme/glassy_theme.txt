@@ -79,6 +79,18 @@ div.changelog-version.card,
 }
 
 /* Popup Modal Styling - Settings Section - General "Dark Themed Glassy Look" */
+.scene-edit-details,
+.sticky.detail-header,
+.bg-secondary.text-white.dropdown-item,
+.react-select__input,
+.react-select__control.css-13cymwt-control,
+.query-text-field-clear.d-none.btn.btn-secondary,
+.query-text-field.bg-secondary.text-white.border-secondary.form-control,
+div.input-group,
+.bg-secondary.text-white.dropdown-menu.show,
+.mb-2.mr-2.d-flex > *,
+.btn-secondary.form-control,
+.saved-filter-list-menu.dropdown-menu.show,
 .background-image-container,
 .detail-header.full-width,
 button.btn.btn-secondary,
@@ -446,6 +458,18 @@ opacity:1;
     animation: textAnimation 1s ease-in-out; /* Adjust the animation duration and timing function as needed */
 }
 
+/*Disables Images from Being Input into Performer and Studio Banners*/
 .background-image-container > picture {
   display: none;
+}
+
+/*Make the fill color of the search bars almost completely transparent*/
+
+.query-text-field.bg-secondary.text-white.border-secondary.form-control path {
+  fill: none;
+}
+
+/*Studios Back to Top Button Text Centered*/
+.sticky.detail-header {
+    text-align: center;
 }
