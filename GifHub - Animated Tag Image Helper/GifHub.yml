@@ -6,6 +6,20 @@ exec:
   - python
   - "{pluginDir}/GifHub.py"
 interface: raw
+settings:
+  tag_name:
+    displayName: Tag Name
+    description: Enter the tag name for GIF search
+    type: STRING
+  another_setting:
+    displayName: Another Setting
+    description: Some description
+    type: BOOLEAN
+hooks:
+  - name: TagUpdate
+    description: Update tag with GIF
+    triggeredBy:
+      - Scene.Update.Post
 tasks:
   - name: SearchAndGenerateGallery
     description: Scrape GIF links from Pornhub and generate an HTML gallery.
