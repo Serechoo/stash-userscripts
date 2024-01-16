@@ -340,8 +340,7 @@ body::before {
 /* Muted Green Borders for .tasks-panel-queue */
 .tasks-panel-queue {
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Glow effect */
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border: 1px solid #77dd77; /* Muted green border color */
+   
     border-radius: 15px; /* Adjust the border-radius for rounded corners */
     margin: 10px 0; /* Add some margin for spacing */
     padding: 10px; /* Add padding to the container */
@@ -505,11 +504,12 @@ button[title="O-Counter"] {
     display: none;
 }
 
+/*Change Country Flag Location on Performers*/
 .performer-card__country-flag {
     position: absolute;
     top: 0;
     left: 0;
-    margin: 2px; /* Adjust margin as needed */
+    margin: 8px; /* Adjust margin as needed */
 }
 
 
@@ -538,7 +538,24 @@ body::before {
   transform: translateZ(-1px) scale(1.5);
 }
 
+/* Make these have transparent backgrounds - Settings */
+.package-manager-toolbar,
+.collapsible-section.collapse.show,
+div.setting,
+div.setting-section {
+  background: rgba(0, 0, 0, 0);
+}
 
+/* Adjust Task Panel Transparency to be more visible */
+#tasks-panel .tasks-panel-queue {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Strip[ Padding and Margins from Checkboxes on Performers */
+.card-check {
+  padding: 0;
+  margin: 0; /* Optional: Remove any margin if applied by default */
+}
 /*Mobile Overhaul*/
 
 /* Media query for mobile devices */
@@ -546,22 +563,6 @@ body::before {
   /* Different background for mobile devices */
   body {
     background-image: url('https://w0.peakpx.com/wallpaper/266/1012/HD-wallpaper-street-night-city-neon-road-cars.jpg');
-  }
-}
-
-/* Media query for mobile devices */
-@media only screen and (max-width: 767px) {
-  /* Disable animations and hover effects on mobile */
-  .movie-recommendations .slick-track,
-  .scene-recommendations .slick-track,
-  .performer-recommendations .slick-track,
-  .studio-recommendations .slick-track,
-  .movie-recommendations .slick-track:hover,
-  .scene-recommendations .slick-track:hover,
-  .performer-recommendations .slick-track:hover,
-  .studio-recommendations .slick-track:hover {
-    animation: none;
-    animation-play-state: running; /* Ensure animations are not paused on hover on mobile */
   }
 }
 
@@ -590,5 +591,21 @@ body::before {
   .btn {
     padding: 6px 12px;
     font-size: 12px;
+  }
+}
+
+/* Media query for mobile devices */
+@media only screen and (max-width: 767px) {
+  /* Disable animations and hover effects on mobile */
+  .movie-recommendations .slick-track,
+  .scene-recommendations .slick-track,
+  .performer-recommendations .slick-track,
+  .studio-recommendations .slick-track,
+  .movie-recommendations .slick-track:hover,
+  .scene-recommendations .slick-track:hover,
+  .performer-recommendations .slick-track:hover,
+  .studio-recommendations .slick-track:hover {
+    animation: none;
+    animation-play-state: running; /* Ensure animations are not paused on hover on mobile */
   }
 }
