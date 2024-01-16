@@ -26,39 +26,10 @@ cursor: pointer;
   opacity: 0.8;
 }
 
-.nav-item:active {
-  transform: scale(0.8); /* Example: Apply scale transformation on click */
-}
-
-/* Responsive Adjustments */
-@media screen and (max-width: 768px) {
-  .container {
-    padding: 8px;
-  }
-
-  .logo {
-    font-size: 12px;
-  }
-
-  .card {
-    padding: 8px;
-  }
-
-  .card-title {
-    font-size: 14px;
-  }
-
-  .card-description {
-    font-size: 12px;
-  }
-
-  .btn {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-}
 
 /* Stylized Settings - Anything with the "embossed"/white shadow around the card */
+.PerformerTagger-performer,
+.StudioTagger-studio,
 li.row.mx-0.mt-2.search-result,
 li.row.mx-0.mt-2.search-result.selected-result.active,
 div.mt-3.search-item,
@@ -79,13 +50,17 @@ div.changelog-version.card,
 }
 
 /* Popup Modal Styling - Settings Section - General "Dark Themed Glassy Look" */
+.ml-1.d-flex.align-items-center,
+div.queue-controls,
+div.queue-content,
+select.input-control.form-control,
 .scene-edit-details,
 .sticky.detail-header,
 .bg-secondary.text-white.dropdown-item,
 .react-select__input,
 .react-select__control.css-13cymwt-control,
-.query-text-field-clear.d-none.btn.btn-secondary,
-.query-text-field.bg-secondary.text-white.border-secondary.form-control,
+select.query-text-field-clear.d-none.btn.btn-secondary,
+select.query-text-field.bg-secondary.text-white.border-secondary.form-control,
 div.input-group,
 .bg-secondary.text-white.dropdown-menu.show,
 .mb-2.mr-2.d-flex > *,
@@ -238,8 +213,6 @@ nav.bg-dark {
     transition: background-position 0.5s ease;
     z-index: -1; /* Set a lower z-index for the pseudo-element */
 }
-
-
 .grid-card.card.zoom-1:hover::before,
 .performer-card.grid-card.card:hover::before,
 .movie-card.grid-card.card:hover::before,
@@ -343,7 +316,7 @@ body::before {
 /* Styling for Glassy Translucent Effect */
 .studio-card-image,
 .video-section .thumbnail-section,
-.card-section .performer-card-image,
+.card-section .performer-card.grid-card,
 .card-section .studio-card-image,
 .card-section .movie-card-image {
   border-radius: 15px;
@@ -472,4 +445,150 @@ opacity:1;
 /*Studios Back to Top Button Text Centered*/
 .sticky.detail-header {
     text-align: center;
+}
+
+/*Tags Styling*/
+.tag-item.badge.badge-secondary {
+  background: rgba(0, 0, 0, 0.8); /* Darker background for dark mode, adjust opacity as needed */
+  color: #fff; /* Text color for dark mode */
+  border-radius: 10px; /* Adjust the border-radius for rounded corners */
+  padding: 10px; /* Adjust the padding as needed */
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1), 0 0 5px rgba(255, 255, 255, 0.1); /* Raised embossed effect */
+}
+
+span.tag-item.badge.badge-secondary {
+    position: relative;
+}
+
+span.tag-item.badge.badge-secondary::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    opacity: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+span.tag-item.badge.badge-secondary:hover::before {
+    opacity: 1;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/*'+' Symbol on Tags are hidden*/
+span.tag-item.badge.badge-secondary button.minimal.ml-2.btn.btn-primary {
+    display: none;
+}
+
+
+
+/* Hide the original button */
+button[title="O-Counter"] {
+    display: none;
+}
+
+.performer-card__country-flag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 2px; /* Adjust margin as needed */
+}
+
+
+/* [Performers tab] Show a larger image in performer's page for desktop */
+.performer-image-container{
+  flex: 0 0 2%;
+  max-width: 2%;
+}
+/* Changing .col-md-8 settings also affects studios and tags display. 50% should be good enough. */
+.col-md-8 {
+  flex: 0 0 2%;
+  max-width: 2%;
+}
+
+
+/* Parallax effect for desktop and mobile */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: inherit;
+  transform: translateZ(-1px) scale(1.5);
+}
+
+
+/*Mobile Overhaul*/
+
+/* Media query for mobile devices */
+@media only screen and (max-width: 767px) {
+  /* Different background for mobile devices */
+  body {
+    background-image: url('https://w0.peakpx.com/wallpaper/266/1012/HD-wallpaper-street-night-city-neon-road-cars.jpg');
+  }
+}
+
+/* Media query for mobile devices */
+@media only screen and (max-width: 767px) {
+  /* Disable animations and hover effects on mobile */
+  .movie-recommendations .slick-track,
+  .scene-recommendations .slick-track,
+  .performer-recommendations .slick-track,
+  .studio-recommendations .slick-track,
+  .movie-recommendations .slick-track:hover,
+  .scene-recommendations .slick-track:hover,
+  .performer-recommendations .slick-track:hover,
+  .studio-recommendations .slick-track:hover {
+    animation: none;
+    animation-play-state: running; /* Ensure animations are not paused on hover on mobile */
+  }
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+
+  .logo {
+    font-size: 12px;
+  }
+
+  .card {
+    padding: 8px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .card-description {
+    font-size: 12px;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }
