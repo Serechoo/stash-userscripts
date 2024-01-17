@@ -16,6 +16,7 @@ p {
   color: rgba(255, 255, 255, 0.8); /* Adjust the alpha value for text transparency */
 }
 
+
 /* Change cursor to pointer on hover for clickable elements */
 
 .movie-card-image
@@ -229,11 +230,10 @@ nav.bg-dark {
   filter: blur(0);
 }
 
-
-
-
 /* Background Studio Grey Banners -- Better Readability */
+.studio-logo,
 .studio-card-image {
+  border-radius: 10px; /* Adjust the border-radius for rounded corners */
   background-color: rgba(26, 26, 26, 0.6);
 }
 
@@ -608,4 +608,75 @@ div.setting-section {
     animation: none;
     animation-play-state: running; /* Ensure animations are not paused on hover on mobile */
   }
+}
+
+/* Apply styles for mobile devices (adjust max-width as needed) */
+@media only screen and (max-width: 767px) {
+    .VideoPlayer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 240px; /* Adjust the height as needed */
+        z-index: 1000; /* Adjust the z-index as needed */
+    }
+
+    .nav.nav-tabs {
+        margin-top: 240px;  /* Set margin-top equal to the height of VideoPlayer */
+        z-index: 1100;
+    }
+}
+
+/* Apply styles for mobile devices (adjust max-width as needed) */
+@media only screen and (max-width: 767px) {
+.scene-header.d-xl-none 
+        width: 100%; /* Ensure full width on mobile */
+}
+
+/* Apply styles for mobile devices (adjust max-width as needed) */
+@media only screen and (max-width: 767px) {
+    h1 {
+        font-size: 24px; /* Adjust the font size for h1 on mobile */
+    }
+
+    h2 {
+        font-size: 22px; /* Adjust the font size for h2 on mobile */
+    }
+
+    h3 {
+        font-size: 18px; /* Adjust the font size for h3 on mobile */
+    }
+
+    h4 {
+        font-size: 18px; /* Adjust the font size for h4 on mobile */
+    }
+
+    h5 {
+        font-size: 16px; /* Adjust the font size for h5 on mobile */
+    }
+
+    h6 {
+        font-size: 14px; /* Adjust the font size for h6 on mobile */
+    }
+}
+
+/* Media query for mobile devices */
+@media only screen and (max-width: 767px) { .studio-logo { {
+  background: rgba(0, 0, 0, 0.4); /* Darker background for dark mode, adjust opacity as needed */
+  color: #fff; /* Text color for dark mode */
+  border-radius: 10px; /* Adjust the border-radius for rounded corners */
+  padding: 20px; /* Adjust the padding as needed */
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1), 0 0 10px rgba(255, 255, 255, 0.1); /* Raised embossed effect */
+  }
+}
+
+/* Apply styles for mobile devices (adjust max-width as needed) */
+@media only screen and (max-width: 767px) {
+    #studio-page .detail-container {
+        margin-bottom: 0; /* Adjust margin-bottom as needed to reduce the gap */
+    }
+
+    #studio-page .nav.nav-tabs {
+        margin-top: 0; /* Adjust margin-top as needed to reduce the gap */
+    }
 }
