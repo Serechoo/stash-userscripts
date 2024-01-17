@@ -680,3 +680,14 @@ div.setting-section {
         margin-top: 0; /* Adjust margin-top as needed to reduce the gap */
     }
 }
+
+/* Apply styles for mobile devices (adjust max-width as needed) */
+@media only screen and (max-width: 767px) {
+    #performer-page .detail-container {
+        margin-bottom: 0; /* Adjust margin-bottom as needed to reduce the gap */
+    }
+
+    #performer-page .nav.nav-tabs {
+        margin-top: 0; /* Adjust margin-top as needed to reduce the gap */
+    }
+}
