@@ -1,7 +1,8 @@
 #GifHub Mass Updater
 
-Run the 'GifHub Mass Updater' Task after putting both 
-the .yml and .py files into your local plugin directory.
+Be sure to create a 'plugins' subdirectory of the root drive ie. 'C:\plugins' and place the GifHub.py file there for now.
+
+Place the GifHub.yml in your Stash native 'plugins' directory so that Stash reads it correctly.
 
 Make sure to click the 'Reload Plugins' button under 'Settings > Plugins > Reload Plugins'
 

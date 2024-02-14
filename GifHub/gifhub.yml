@@ -3,7 +3,7 @@ description: Mass update tags with GIF images from Pornhub
 version: 1
 exec:
   - python
-  - {pluginDir}/GifHub.py
+  - plugins/GifHub.py
 tasks:
   - name: Run GifHub Mass Updater
     description: Update tags with GIFs from Pornhub
