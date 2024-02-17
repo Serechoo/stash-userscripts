@@ -1,4 +1,6 @@
-# Stash-Aid
+# Stash-Aid 
+
+**As of this time, the add-on assumes you don't have a local API key, and that the address to your Stash is localhost:9999**
 
 A work-in-progress webserver add-on to extend the functionality (and hopefully provide some QoL improvements) of your Stash media server.
 
@@ -44,7 +46,22 @@ From here, when you visit the server (server web address is in the terminal) you
 
 ![Main Page](.github/images/stashAid.png)
 
+Please browse the different pages that are included! 
+
+**NOTE**: In order to get the StashDB page functional, you will need to go into the '/static/script.js' and update 
+
+Line 3: ```const api_key = 'YOUR_STASHDB_API_KEY'; // Replace with your actual API key``` 
+
+**OTHER NOTE**: You may have to change two lines in stashAid.py in order to target your environment's custom.css file for the Stash CSS Editor:
+
+Line 158: ```return send_from_directory('C:\\Stash_Server\\', 'custom.css')```
+
+Line 165: ```with open('C:\\Stash_Server\\custom.css', 'w') as file:```
+
+## More Details
 
 For more details on Python, visit the official documentation: https://docs.python.org/3/
 
-For more details on NodeJS and npm packages, refer to the NodeJS documentation: https://nodejs.org/en/docs/ and the npm documentation: https://docs.npmjs.com/
+For more details on NodeJS and npm packages, refer to the NodeJS documentation: 
+
+https://nodejs.org/en/docs/ and the npm documentation: https://docs.npmjs.com/
