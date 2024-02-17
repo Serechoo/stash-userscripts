@@ -16,7 +16,7 @@ NodeJS: https://nodejs.org/
 
 Python: https://www.python.org/downloads/
 
-Setting up the Environment
+## Setting up the Environment
 
 Python Dependencies
 
