@@ -81,17 +81,50 @@
     </div>
     <div>
         <label for="studio-select">Select a Studio:</label>
-        <select id="studio-select">
-        </select>
+        <select id="studio-select"></select>
     </div>
     <div>
-        <label>Select the order of keys:</label><br>
-        <input type="checkbox" id="studio-checkbox">
-        <label for="studio-checkbox">Studio</label><br>
-        <input type="checkbox" id="performer-checkbox">
-        <label for="performer-checkbox">Performer</label><br>
-        <input type="checkbox" id="date-checkbox">
-        <label for="date-checkbox">Date</label><br>
+        <label>Select Keys and Designator:</label><br>
+        <div>
+            <input type="checkbox" id="studio-checkbox">
+            <label for="studio-checkbox">Studio</label>
+            <select id="studio-wrap-select">
+                <option value="none">None</option>
+                <option value="square">Square Brackets</option>
+                <option value="curly">Curly Braces</option>
+                <option value="parentheses">Parentheses</option>
+            </select>
+        </div>
+        <div>
+            <input type="checkbox" id="performer-checkbox">
+            <label for="performer-checkbox">Performer</label>
+            <select id="performer-wrap-select">
+                <option value="none">None</option>
+                <option value="square">Square Brackets</option>
+                <option value="curly">Curly Braces</option>
+                <option value="parentheses">Parentheses</option>
+            </select>
+        </div>
+        <div>
+            <input type="checkbox" id="date-checkbox">
+            <label for="date-checkbox">Date</label>
+            <select id="date-wrap-select">
+                <option value="none">None</option>
+                <option value="square">Square Brackets</option>
+                <option value="curly">Curly Braces</option>
+                <option value="parentheses">Parentheses</option>
+            </select>
+        </div>
+        <div>
+            <input type="checkbox" id="title-checkbox">
+            <label for="title-checkbox">Title</label>
+            <select id="title-wrap-select">
+                <option value="none">None</option>
+                <option value="square">Square Brackets</option>
+                <option value="curly">Curly Braces</option>
+                <option value="parentheses">Parentheses</option>
+            </select>
+        </div>
     </div>
     <div>
         <input type="checkbox" id="select-all-checkbox">
@@ -103,6 +136,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var logContainer = document.getElementById('rename-log');
+            var selectedKeys = []; // Array to store selected keys for filename generation
 
             var table = new Tabulator("#tabulator-table", {
                 layout: "fitData",
@@ -287,40 +321,6 @@
                 });
             });
 
-            // Function to generate preview filename
-            function generatePreviewFilename(data) {
-                // Initialize filename parts
-                var filenameParts = [];
-                
-                // Get the file extension from the first file path
-                var extension = data.files[0].path.split('.').pop();
-                
-                // Add keys based on checkbox selection
-                if (document.getElementById('studio-checkbox').checked && data.studio && data.studio.name) {
-                    filenameParts.push('[' + data.studio.name + ']');
-                }
-                if (document.getElementById('performer-checkbox').checked && data.performers && data.performers.length > 0) {
-                    var performerNames = data.performers.map(performer => performer.name).join('-');
-                    filenameParts.push('[' + performerNames + ']');
-                }
-                if (data.title) {
-                    filenameParts.push(data.title);
-                }
-                if (document.getElementById('date-checkbox').checked && data.date) {
-                    filenameParts.push('[' + data.date + ']');
-                }
-                
-                // Add file extension
-                if (extension) {
-                    filenameParts.push("." + extension); // Add '.' before the extension
-                }
-                
-                // Join filename parts with spaces
-                var previewFilename = filenameParts.join('-');
-                
-                return previewFilename;
-            }
-
             // Function to display rename feedback
             function showRenameFeedback(data, newPath, isError = false) {
                 var logEntry = document.createElement('div');
@@ -335,9 +335,19 @@
                 logContainer.insertBefore(logEntry, logContainer.firstChild); // Add new log entry at the beginning
             }
 
-            // Update preview filename when checkboxes are changed
+            // Checkbox event listener
             document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
                 checkbox.addEventListener('change', function() {
+                    var key = this.id;
+                    if (this.checked) {
+                        // Add the key to selectedKeys if checked
+                        selectedKeys.push(key);
+                    } else {
+                        // Remove the key from selectedKeys if unchecked
+                        selectedKeys = selectedKeys.filter(selectedKey => selectedKey !== key);
+                    }
+
+                    // Regenerate preview filename based on selectedKeys and preferred wrapping character
                     table.updateColumnDefinition("previewFilename", { formatter: function(cell) {
                         var data = cell.getRow().getData();
                         var previewFilename = generatePreviewFilename(data);
@@ -345,6 +355,47 @@
                     }});
                 });
             });
+
+            // Function to generate preview filename
+			function generatePreviewFilename(data) {
+				// Initialize filename parts
+				var filenameParts = [];
+			
+				// Get the file extension from the first file path
+				var extension = data.files[0].path.split('.').pop();
+			
+				// Add keys based on the order of selected checkboxes
+				selectedKeys.forEach(function(key) {
+					var keyId = key + '-wrap-select'; // Get the ID of the corresponding select element
+					var wrapSelect = document.getElementById(keyId);
+					var wrapCharacter = (wrapSelect && wrapSelect.value !== 'none') ? wrapSelect.value : ''; // Get the wrapping character
+			
+					if (key === 'studio-checkbox' && data.studio && data.studio.name) {
+						filenameParts.push('[' + data.studio.name + ']');
+					}
+					if (key === 'performer-checkbox' && data.performers && data.performers.length > 0) {
+						var performerNames = data.performers.map(performer => performer.name).join('-');
+						filenameParts.push('[' + performerNames + ']');
+					}
+					if (key === 'date-checkbox' && data.date) {
+						filenameParts.push('[' + data.date + ']');
+					}
+					if (key === 'title-checkbox' && data.title) {
+						filenameParts.push(data.title);
+					}
+				});
+			
+				// Add file extension
+				if (extension) {
+					filenameParts.push("." + extension); // Add '.' before the extension
+				}
+			
+				// Join filename parts with spaces
+				var previewFilename = filenameParts.join('-');
+			
+				return previewFilename;
+			}
+
 
             // Select All checkbox functionality
             document.getElementById('select-all-checkbox').addEventListener('change', function() {
@@ -361,34 +412,33 @@
                 const filePath = data.files[0].path;
                 const directory = filePath.substring(0, filePath.lastIndexOf('\\') + 1); // Extract directory part
                 const extension = filePath.split('.').pop(); // Extract file extension
-                const cleanedPreviewFilename = previewFilename.replace(/[_-]\./, '.'); // Remove join operators before the file extension
+                const cleanedPreviewFilename = previewFilename.replace(/[-_]\./, '.'); // Remove join operators before the file extension
                 const sanitizedFilename = cleanedPreviewFilename.replace(/[/:*?]/g, ''); // Remove all ':' '*' '?' and '/' characters
                 const newPath = directory + sanitizedFilename; // Concatenate directory with the new filename
                 return newPath;
             }
 
             // Highlight duplicates
-			function highlightDuplicates() {
-				const rows = table.getData();
-				const seen = new Set();
-				rows.forEach(row => {
-					const titleValue = row.title;
-					if (titleValue && seen.has(titleValue)) {
-						table.getRow(row.id).getElement().style.backgroundColor = 'red';
-					}
-					seen.add(titleValue);
-				});
-			}
-			
-			// Call highlightDuplicates function after setting data
-			table.setData(data).then(() => {
-				const rows = table.getData();
-				const titleColumn = table.getColumn('title');
-				titleColumn.cells.forEach(cell => {
-					highlightDuplicates(cell, rows);
-				});
-			});
-		});
+            function highlightDuplicates() {
+                const rows = table.getData();
+                const seen = new Set();
+                rows.forEach(row => {
+                    const titleValue = row.title;
+                    if (titleValue && seen.has(titleValue)) {
+                        table.getRow(row.id).getElement().style.backgroundColor = 'red';
+                    }
+                    seen.add(titleValue);
+                });
+            }
+
+            // Call highlightDuplicates function after setting data
+            table.getData().then(rows => {
+                const titleColumn = table.getColumn('title');
+                titleColumn.cells.forEach(cell => {
+                    highlightDuplicates(cell, rows);
+                });
+            });
+        });
     </script>
 </body>
 </html>
