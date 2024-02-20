@@ -9,6 +9,21 @@ import psutil
 from flask import Flask, render_template
 import stashapi.log as log
 from stashapi.stashapp import StashInterface
+from pathlib import Path
+import logging
+from logging.handlers import RotatingFileHandler
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+handler = RotatingFileHandler('app.log', maxBytes=10000000, backupCount=3)
+
+
+# Log Formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 app = Flask(__name__, static_url_path='/static')
 CORS(app)
@@ -27,11 +42,11 @@ flask_server_pid = os.getpid()
 script_paths = {
     'export_performer_images': {
         'type': 'python',
-        'path': './stashAssistant/python_scripts/Performer Image Export/stash_performer_image_export.py'
+        'path': './python_scripts/Performer Image Export/stash_performer_image_export.py'
     },
     'gallery_scraper': {
         'type': 'node',
-        'path': './stashAssistant/node_scripts/Performer Gallery Scraper/gallery_scraper.js'
+        'path': './node_scripts/Performer Gallery Scraper/gallery_scraper.js'
     }
     # Add more scripts as needed
 }
@@ -67,6 +82,11 @@ def execute_script_route(script_id):
         try:
             process = execute_script(script_id)
             running_processes[script_id] = process
+            
+            # Read output from the script and log it
+            for line in iter(process.stdout.readline, b''):
+                logger.info(line.strip())
+            
             return Response(stream_output(process), content_type='text/event-stream')
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -107,11 +127,7 @@ def featured():
     
 @app.route('/stash_editor')
 def stash_editor():
-    return render_template('stash_editor.html')
-
-@app.route('/missing_scenes')
-def missing_scenes():
-    return render_template('missing_scenes.html')    
+    return render_template('stash_editor.html')   
     
 @app.route('/graphql')
 def graphql():
@@ -186,16 +202,16 @@ def stash_scene_details():
 def rename_file():
     try:
         data = request.json
-        old_path = data.get('oldPath')
-        new_path = data.get('newPath')
+        old_path = Path(data.get('oldPath'))
+        new_path = Path(data.get('newPath'))
         
-        # Print out the old and new paths for debugging
-        print("Old Path:", old_path)
-        print("New Path:", new_path)
+        logger.info(f"Old Path: {old_path}")
+        logger.info(f"New Path: {new_path}")
         
-        os.rename(old_path, new_path)
+        old_path.rename(new_path)
         return jsonify({'message': 'File renamed successfully'})
     except Exception as e:
+        logger.error(f'Error renaming file: {e}', exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/delete_file', methods=['POST'])
@@ -212,6 +228,23 @@ def delete_file():
 @app.route('/stash_data')
 def stash_data():
     return render_template('stash_data.html')
+    
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
+@app.route('/logs')
+def view_logs():
+    level = request.args.get('level', '').upper()
+    query = request.args.get('query', '').lower()
+    
+    logs = []
+    with open('app.log', 'r') as log_file:
+        for line in log_file:
+            if (not level or level in line) and (not query or query in line.lower()):
+                logs.append(line)
+    
+    return render_template('logs.html', logs=logs)
 
 
 if __name__ == '__main__':

@@ -364,37 +364,58 @@
 				// Get the file extension from the first file path
 				var extension = data.files[0].path.split('.').pop();
 			
+				// Function to wrap text with the selected wrapper
+				function wrapText(text, wrapSelectId) {
+					var wrapSelect = document.getElementById(wrapSelectId);
+					var wrapperType = wrapSelect ? wrapSelect.value : 'none'; // Get the wrapping character
+			
+					switch (wrapperType) {
+						case "square":
+							return "[" + text + "]";
+						case "curly":
+							return "{" + text + "}";
+						case "parentheses":
+							return "(" + text + ")";
+						default:
+							return text; // No wrapper or "none" selected
+					}
+				}
+			
 				// Add keys based on the order of selected checkboxes
 				selectedKeys.forEach(function(key) {
-					var keyId = key + '-wrap-select'; // Get the ID of the corresponding select element
-					var wrapSelect = document.getElementById(keyId);
-					var wrapCharacter = (wrapSelect && wrapSelect.value !== 'none') ? wrapSelect.value : ''; // Get the wrapping character
+					var wrapSelectId = key.replace('-checkbox', '') + '-wrap-select'; // Construct the ID of the corresponding select element
 			
 					if (key === 'studio-checkbox' && data.studio && data.studio.name) {
-						filenameParts.push('[' + data.studio.name + ']');
+						filenameParts.push(wrapText(data.studio.name, wrapSelectId));
 					}
 					if (key === 'performer-checkbox' && data.performers && data.performers.length > 0) {
-						var performerNames = data.performers.map(performer => performer.name).join('-');
-						filenameParts.push('[' + performerNames + ']');
+						var performerNames = data.performers.map(performer => performer.name).join(', ');
+						filenameParts.push(wrapText(performerNames, wrapSelectId));
 					}
 					if (key === 'date-checkbox' && data.date) {
-						filenameParts.push('[' + data.date + ']');
+						filenameParts.push(wrapText(data.date, wrapSelectId));
 					}
 					if (key === 'title-checkbox' && data.title) {
-						filenameParts.push(data.title);
+						filenameParts.push(wrapText(data.title, wrapSelectId));
 					}
 				});
 			
 				// Add file extension
-				if (extension) {
-					filenameParts.push("." + extension); // Add '.' before the extension
-				}
+				filenameParts.push(extension ? "." + extension : ""); // Add '.' before the extension if it exists
 			
-				// Join filename parts with spaces
+				// Join filename parts with a hyphen
 				var previewFilename = filenameParts.join('-');
 			
 				return previewFilename;
 			}
+
+			// After the studios dropdown is populated and event listeners for checkboxes are set
+			document.querySelectorAll('select[id$="-wrap-select"]').forEach(function(select) {
+				select.addEventListener('change', function() {
+					// Trigger update on preview filenames whenever a designator is changed
+					table.redraw(true); // This forces a full table redraw and updates the preview filenames
+				});
+			});
 
 
             // Select All checkbox functionality
