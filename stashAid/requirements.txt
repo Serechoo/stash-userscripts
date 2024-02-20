@@ -6,3 +6,5 @@ stashapp-tools
 flask
 flask-cors
 psutil
+stashapi
+logging
