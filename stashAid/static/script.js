@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Your GraphQL query and API key
-    const api_key = 'YOUR_STASHDB_API_KEY'; // Replace with your actual API key
+    const api_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI0ZmFiOTFhZC02NjFlLTQ2MGItYWI5Mi0xOTk1ZjFiY2Q1N2QiLCJzdWIiOiJBUElLZXkiLCJpYXQiOjE2OTMxODI0MDF9.-KXkiupF8zW8IiL8zyG7soCkWxbPu5k7mrMQnlRhuxI'; // Replace with your actual API key
     const url = 'https://stashdb.org/graphql';
 
     // Calculate the date 7 days ago
@@ -11,30 +11,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Construct the GraphQL query with the updated date
     const defaultQuery = `
-        query QueryScenes {
-            queryScenes(
-                input: { per_page: 27, date: { value: "${formattedDate}", modifier: GREATER_THAN } }
-            ) {
-                scenes {
-                    title
-                    release_date
-                    urls {
-                        url
-                    }
-                    images {
-                        url
-                    }
-                    performers {
-                        performer {
-                            name
-                        }
-                    }
-                    tags {
-                        name
-                    }
-                }
-            }
-        }
+	query QueryScenes {
+			queryScenes(
+				input: {
+					per_page: 27
+					date: { value: "${formattedDate}", modifier: GREATER_THAN }
+				}
+			) {
+				scenes {
+					title
+					release_date
+					urls {
+						url
+					}
+					images {
+						url
+					}
+					performers {
+						performer {
+							name
+						}
+					}
+					tags {
+						name
+					}
+					studio {
+						name
+					}
+				}
+			}
+		}
     `;
 
     const favoritesQuery = `
@@ -88,6 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		
 		// Extract studio name
 		const studioName = scene.studio ? scene.studio.name : 'N/A';
+		
+		// Extract scene url
+		const sceneURL = scene.urls && scene.urls.length > 0 ? scene.urls[0].url : 'N/A';
 
         // Populate the scene card with data
         sceneCard.innerHTML = `
@@ -95,8 +104,10 @@ document.addEventListener("DOMContentLoaded", function () {
             <h2>${scene.title || 'N/A'}</h2>
             <p>Tags: ${tagNames || 'N/A'}</p>
             <p>Performers: ${performerNames || 'N/A'}</p>
-			<p>Studio: ${studioName}</p>
+			<p>Studio: ${studioName || 'N/A'}</p>
             <p>Release Date: ${scene.release_date || 'N/A'}</p>
+			<p>Visit: <a href="${sceneURL}" target="_blank" style="color: cyan;">${sceneURL !== 'N/A' ? sceneURL : 'N/A'}</a></p>
+			
         `;
 
         return sceneCard;
