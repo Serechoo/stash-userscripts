@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Your GraphQL query and API key
-    const api_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI0ZmFiOTFhZC02NjFlLTQ2MGItYWI5Mi0xOTk1ZjFiY2Q1N2QiLCJzdWIiOiJBUElLZXkiLCJpYXQiOjE2OTMxODI0MDF9.-KXkiupF8zW8IiL8zyG7soCkWxbPu5k7mrMQnlRhuxI'; // Replace with your actual API key
+    const api_key = 'YOUR_STASHDB_API_KEY'; // Replace with your actual API key
     const url = 'https://stashdb.org/graphql';
 
     // Calculate the date 7 days ago

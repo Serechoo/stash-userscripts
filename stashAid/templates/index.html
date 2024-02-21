@@ -55,6 +55,11 @@
 			width: calc(100vw - 190px); /* Make iframe occupy remaining width */
 			height: 100%; /* Make iframe occupy full height */
 		}
+		h2 {
+            font-family: Monaco, monospace; /* Use Monaco font */
+            color: #fff; /* White heading color */
+            text-align: center;
+        }
 
     </style>
 </head>
@@ -106,6 +111,12 @@
                     <a class="nav-link" href="#" onclick="loadContent('/logs')">
                         <i class="bi bi-journal-text"></i> <!-- Bootstrap icon -->
                         Scripts & Logs
+                    </a>
+                </li>
+				<li class="nav-item">
+                    <a class="nav-link" href="#" onclick="loadContent('/view_tasks')">
+                        <i class="bi bi-journal-text"></i> <!-- Bootstrap icon -->
+                        Task Scheduler
                     </a>
                 </li>
             </ul>
