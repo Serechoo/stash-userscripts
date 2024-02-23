@@ -124,6 +124,16 @@ def terminate_script(script_type):
 @app.route('/featured')
 def featured():
     return render_template('featured.html')
+    
+# Route to serve wiki.html template
+@app.route('/wiki')
+def wiki():
+    return render_template('wiki.html')
+
+# Route to serve featured.html template
+@app.route('/plugins')
+def plugins():
+    return render_template('plugins.html')
 
 # Route to serve stash_editor.html template
 @app.route('/stash_editor')
