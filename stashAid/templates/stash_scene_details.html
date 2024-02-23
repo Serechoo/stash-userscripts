@@ -72,8 +72,16 @@
             margin: 5px 0;
             white-space: pre-wrap;
         }
+		h2 {
+            font-family: Monaco, monospace; /* Use Monaco font */
+            color: #fff; /* White heading color */
+            text-align: center;
+        }
     </style>
 </head>
+<h2>
+Stash Bulk File Renamer
+</h2>
 <body>
     <div id="log-container">
         <p id="log-title">Rename Log:</p>
@@ -132,98 +140,67 @@
     </div>
     <div id="tabulator-table"></div>
     <button id="rename-button" class="rename-button">Rename Files</button>
+	<button id="move-button" class="rename-button">Move Files</button>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var logContainer = document.getElementById('rename-log');
-            var selectedKeys = []; // Array to store selected keys for filename generation
+    document.addEventListener('DOMContentLoaded', function() {
+        var logContainer = document.getElementById('rename-log');
+        var selectedKeys = []; // Array to store selected keys for filename generation
 
-            var table = new Tabulator("#tabulator-table", {
-                layout: "fitData",
-                pagination: "local",
-                paginationSize: 25,
-                paginationSizeSelector: [25, 50, 100],
-                selectableRows: true, // Enable row selection
-                selectableRowsRangeMode: "click", // Allow multiple row selection with click and drag
-                columns: [
-                    { title: "Scene ID", field: "id", widthGrow: 1 },
-                    { title: "Title", field: "title", widthGrow: 1 },
-                    { title: "Studio Name", field: "studio.name", widthGrow: 1 },
-                    { title: "Performer Name", field: "performers", formatter: function(cell) {
-                        return cell.getValue().map(performer => performer.name).join(', ');
-                    }, widthGrow: 1 },
-                    { title: "Date", field: "date", widthGrow: 1 },
-                    { title: "File Path", field: "files", formatter: function(cell) {
-                        return cell.getValue().map(file => file.path).join('<br>');
-                    }, widthGrow: 1 },
-                    { title: "Preview Filename", field: "previewFilename", formatter: function(cell) {
-                        var data = cell.getRow().getData();
-                        var previewFilename = generatePreviewFilename(data);
-                        return previewFilename;
-                    }, widthGrow: 1 }
-                ],
-                rowClick: function(e, row) {
-                    var selected = row.isSelected();
-                    row.toggleSelect(!selected); // Toggle selection state of the clicked row
-                }
-            });
-
-            // Function to fetch scenes based on selected studio
-            function fetchScenes(selectedStudioId) {
-                fetch('http://localhost:9999/graphql', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        query: `query FindScenes {
-                            findScenes(scene_filter: { studios: { value: ${selectedStudioId}, modifier: EQUALS } },
-                                filter: { per_page: -1 }
-                            ){  scenes {
-                                    id
-                                    title
-                                    studio {
-                                        name
-                                    }
-                                    performers {
-                                        name
-                                    }
-                                    date
-                                    files {
-                                        path
-                                    }
-                                }
-                            }
-                        }`
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const scenes = data.data.findScenes.scenes;
-                    table.setData(scenes).then(() => {
-                        highlightDuplicates(); // Highlight duplicates after setting data
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching scenes:', error);
-                });
+        var table = new Tabulator("#tabulator-table", {
+            layout: "fitData",
+            pagination: "local",
+            paginationSize: 25,
+            paginationSizeSelector: [25, 50, 100],
+            selectableRows: true, // Enable row selection
+            selectableRowsRangeMode: "click", // Allow multiple row selection with click and drag
+            columns: [
+                { title: "Scene ID", field: "id", widthGrow: 1 },
+                { title: "Title", field: "title", widthGrow: 1 },
+                { title: "Studio Name", field: "studio.name", widthGrow: 1 },
+                { title: "Performer Name", field: "performers", formatter: function(cell) {
+                    return cell.getValue().map(performer => performer.name).join(', ');
+                }, widthGrow: 1 },
+                { title: "Date", field: "date", widthGrow: 1 },
+                { title: "File Path", field: "files", formatter: function(cell) {
+                    return cell.getValue().map(file => file.path).join('<br>');
+                }, widthGrow: 1 },
+                { title: "Preview Filename", field: "previewFilename", formatter: function(cell) {
+                    var data = cell.getRow().getData();
+                    var previewFilename = generatePreviewFilename(data);
+                    return previewFilename;
+                }, widthGrow: 1 }
+            ],
+            rowClick: function(e, row) {
+                var selected = row.isSelected();
+                row.toggleSelect(!selected); // Toggle selection state of the clicked row
             }
+        });
 
-            // Function to fetch studios and populate select dropdown
+        // Function to fetch scenes based on selected studio
+        function fetchScenes(selectedStudioId) {
             fetch('http://localhost:9999/graphql', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    query: `query FindStudios {
-                        findStudios(
-                            studio_filter: { scene_count: { value: 0, modifier: GREATER_THAN } },
+                body: JSON.stringify({
+                    query: `query FindScenes {
+                        findScenes(scene_filter: { studios: { value: ${selectedStudioId}, modifier: EQUALS } },
                             filter: { per_page: -1 }
-                        ) {
-                            studios {
-                                name
+                        ){  scenes {
                                 id
+                                title
+                                studio {
+                                    name
+                                }
+                                performers {
+                                    name
+                                }
+                                date
+                                files {
+                                    path
+                                }
                             }
                         }
                     }`
@@ -231,46 +208,151 @@
             })
             .then(response => response.json())
             .then(data => {
-                const studios = data.data.findStudios.studios;
-                const selectElement = document.getElementById('studio-select');
-
-                // Add placeholder option
-                const placeholderOption = document.createElement('option');
-                placeholderOption.value = "";
-                placeholderOption.disabled = true;
-                placeholderOption.selected = true;
-                placeholderOption.textContent = "Select Studio";
-                selectElement.appendChild(placeholderOption);
-
-                studios.forEach(studio => {
-                    const option = document.createElement('option');
-                    option.value = studio.id;
-                    option.textContent = studio.name;
-                    selectElement.appendChild(option);
-                });
-
-                selectElement.addEventListener('change', () => {
-                    const selectedStudioId = parseInt(selectElement.value);
-                    fetchScenes(selectedStudioId);
+                const scenes = data.data.findScenes.scenes;
+                table.setData(scenes).then(() => {
+                    highlightDuplicates(); // Highlight duplicates after setting data
                 });
             })
             .catch(error => {
-                console.error('Error fetching studios:', error);
+                console.error('Error fetching scenes:', error);
+            });
+        }
+
+        // Function to fetch studios and populate select dropdown
+        fetch('http://localhost:9999/graphql', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                query: `query FindStudios {
+                    findStudios(
+                        studio_filter: { scene_count: { value: 0, modifier: GREATER_THAN } },
+                        filter: { per_page: -1 }
+                    ) {
+                        studios {
+                            name
+                            id
+                        }
+                    }
+                }`
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const studios = data.data.findStudios.studios;
+            const selectElement = document.getElementById('studio-select');
+
+            // Add placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = "";
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            placeholderOption.textContent = "Select Studio";
+            selectElement.appendChild(placeholderOption);
+
+            studios.forEach(studio => {
+                const option = document.createElement('option');
+                option.value = studio.id;
+                option.textContent = studio.name;
+                selectElement.appendChild(option);
             });
 
-            // File renaming functionality
-            document.getElementById('rename-button').addEventListener('click', function() {
-                var selectedRows = table.getSelectedRows();
-                var renamePromises = []; // Array to store promises for each rename operation
+            selectElement.addEventListener('change', () => {
+                const selectedStudioId = parseInt(selectElement.value);
+                fetchScenes(selectedStudioId);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching studios:', error);
+        });
+
+        // File renaming functionality
+        document.getElementById('rename-button').addEventListener('click', function() {
+            var selectedRows = table.getSelectedRows();
+            var renamePromises = []; // Array to store promises for each rename operation
+
+            selectedRows.forEach(function(row) {
+                var rowData = row.getData();
+                var oldPath = rowData.files[0].path; // Get the old file path
+                var newPath = generateNewFilePath(rowData); // Get the new file path
+
+                // Push the rename promise to the array
+                renamePromises.push(
+                    fetch('/rename_file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            oldPath: oldPath,
+                            newPath: newPath
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Log the response message
+                        console.log(data.message);
+
+                        // Display feedback to the user
+                        showRenameFeedback(rowData, newPath);
+                    })
+                    .catch(error => {
+                        console.error('Error renaming file:', error);
+                        // Display error message if renaming failed
+                        showRenameFeedback(rowData, newPath, true);
+                    })
+                );
+            });
+
+            // Wait for all rename promises to resolve
+            Promise.all(renamePromises)
+            .then(() => {
+                // Trigger metadata scan after all files are successfully renamed
+                return fetch('http://localhost:9999/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: `mutation MetadataScan {
+                            metadataScan(input: { paths: [] })
+                        }`
+                    })
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Metadata scan triggered successfully.');
+            })
+            .catch(error => {
+                console.error('Error triggering metadata scan:', error);
+            });
+        });
+
+        // Move files functionality
+        document.getElementById('move-button').addEventListener('click', function() {
+            var selectedRows = table.getSelectedRows();
+            var destinationDirectory = prompt("Enter destination directory path:");
+
+            if (destinationDirectory) {
+                // Normalize the destination directory path
+                destinationDirectory = destinationDirectory.replace(/\//g, '\\'); // Convert forward slashes to backward slashes
+                if (!destinationDirectory.endsWith('\\')) {
+                    destinationDirectory += '\\'; // Ensure the path ends with a backward slash
+                }
+
+                var movePromises = []; // Array to store promises for each move operation
 
                 selectedRows.forEach(function(row) {
                     var rowData = row.getData();
-                    var oldPath = rowData.files[0].path; // Get the old file path
-                    var newPath = generateNewFilePath(rowData); // Get the new file path
+                    var oldPath = rowData.files[0].path;
+                    var filename = oldPath.substring(oldPath.lastIndexOf('\\') + 1); // Extract filename from path
+                    var newPath = destinationDirectory; // Construct new path for Windows
 
-                    // Push the rename promise to the array
-                    renamePromises.push(
-                        fetch('/rename_file', {
+                    // Move file
+                    movePromises.push(
+                        fetch('/move_file', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -282,24 +364,20 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            // Log the response message
                             console.log(data.message);
-
-                            // Display feedback to the user
-                            showRenameFeedback(rowData, newPath);
+                            showMoveFeedback(rowData, newPath);
                         })
                         .catch(error => {
-                            console.error('Error renaming file:', error);
-                            // Display error message if renaming failed
-                            showRenameFeedback(rowData, newPath, true);
+                            console.error('Error moving file:', error);
+                            showMoveFeedback(rowData, newPath, true);
                         })
                     );
                 });
 
-                // Wait for all rename promises to resolve
-                Promise.all(renamePromises)
+                // Wait for all move promises to resolve
+                Promise.all(movePromises)
                 .then(() => {
-                    // Trigger metadata scan after all files are successfully renamed
+                    // Trigger metadata scan after all files are successfully moved
                     return fetch('http://localhost:9999/graphql', {
                         method: 'POST',
                         headers: {
@@ -319,147 +397,162 @@
                 .catch(error => {
                     console.error('Error triggering metadata scan:', error);
                 });
-            });
-
-            // Function to display rename feedback
-            function showRenameFeedback(data, newPath, isError = false) {
-                var logEntry = document.createElement('div');
-                logEntry.classList.add('log-entry');
-                if (isError) {
-                    logEntry.textContent = "Error renaming file:\n";
-                } else {
-                    logEntry.textContent = "File renamed successfully:\n";
-                }
-                logEntry.textContent += "Old Path: " + data.files[0].path + "\n";
-                logEntry.textContent += "New Path: " + newPath;
-                logContainer.insertBefore(logEntry, logContainer.firstChild); // Add new log entry at the beginning
             }
+        });
 
-            // Checkbox event listener
-            document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
-                checkbox.addEventListener('change', function() {
-                    var key = this.id;
-                    if (this.checked) {
-                        // Add the key to selectedKeys if checked
-                        selectedKeys.push(key);
-                    } else {
-                        // Remove the key from selectedKeys if unchecked
-                        selectedKeys = selectedKeys.filter(selectedKey => selectedKey !== key);
-                    }
+        // Function to display move feedback
+        function showMoveFeedback(data, newPath, isError = false) {
+            var logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry');
+            if (isError) {
+                logEntry.textContent = "Error moving file:\n";
+            } else {
+                logEntry.textContent = "File moved successfully:\n";
+            }
+            logEntry.textContent += "Old Path: " + data.files[0].path + "\n";
+            logEntry.textContent += "New Path: " + newPath;
+            logContainer.insertBefore(logEntry, logContainer.firstChild); // Add new log entry at the beginning
+        }
 
-                    // Regenerate preview filename based on selectedKeys and preferred wrapping character
-                    table.updateColumnDefinition("previewFilename", { formatter: function(cell) {
-                        var data = cell.getRow().getData();
-                        var previewFilename = generatePreviewFilename(data);
-                        return previewFilename;
-                    }});
-                });
-            });
+        // Function to display rename feedback
+        function showRenameFeedback(data, newPath, isError = false) {
+            var logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry');
+            if (isError) {
+                logEntry.textContent = "Error renaming file:\n";
+            } else {
+                logEntry.textContent = "File renamed successfully:\n";
+            }
+            logEntry.textContent += "Old Path: " + data.files[0].path + "\n";
+            logEntry.textContent += "New Path: " + newPath;
+            logContainer.insertBefore(logEntry, logContainer.firstChild); // Add new log entry at the beginning
+        }
 
-            // Function to generate preview filename
-			function generatePreviewFilename(data) {
-				// Initialize filename parts
-				var filenameParts = [];
-			
-				// Get the file extension from the first file path
-				var extension = data.files[0].path.split('.').pop();
-			
-				// Function to wrap text with the selected wrapper
-				function wrapText(text, wrapSelectId) {
-					var wrapSelect = document.getElementById(wrapSelectId);
-					var wrapperType = wrapSelect ? wrapSelect.value : 'none'; // Get the wrapping character
-			
-					switch (wrapperType) {
-						case "square":
-							return "[" + text + "]";
-						case "curly":
-							return "{" + text + "}";
-						case "parentheses":
-							return "(" + text + ")";
-						default:
-							return text; // No wrapper or "none" selected
-					}
-				}
-			
-				// Add keys based on the order of selected checkboxes
-				selectedKeys.forEach(function(key) {
-					var wrapSelectId = key.replace('-checkbox', '') + '-wrap-select'; // Construct the ID of the corresponding select element
-			
-					if (key === 'studio-checkbox' && data.studio && data.studio.name) {
-						filenameParts.push(wrapText(data.studio.name, wrapSelectId));
-					}
-					if (key === 'performer-checkbox' && data.performers && data.performers.length > 0) {
-						var performerNames = data.performers.map(performer => performer.name).join(', ');
-						filenameParts.push(wrapText(performerNames, wrapSelectId));
-					}
-					if (key === 'date-checkbox' && data.date) {
-						filenameParts.push(wrapText(data.date, wrapSelectId));
-					}
-					if (key === 'title-checkbox' && data.title) {
-						filenameParts.push(wrapText(data.title, wrapSelectId));
-					}
-				});
-			
-				// Add file extension
-				filenameParts.push(extension ? "." + extension : ""); // Add '.' before the extension if it exists
-			
-				// Join filename parts with a hyphen
-				var previewFilename = filenameParts.join('-');
-			
-				return previewFilename;
-			}
-
-			// After the studios dropdown is populated and event listeners for checkboxes are set
-			document.querySelectorAll('select[id$="-wrap-select"]').forEach(function(select) {
-				select.addEventListener('change', function() {
-					// Trigger update on preview filenames whenever a designator is changed
-					table.redraw(true); // This forces a full table redraw and updates the preview filenames
-				});
-			});
-
-
-            // Select All checkbox functionality
-            document.getElementById('select-all-checkbox').addEventListener('change', function() {
+        // Checkbox event listener
+        document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                var key = this.id;
                 if (this.checked) {
-                    table.selectRow(); // Select all rows
+                    // Add the key to selectedKeys if checked
+                    selectedKeys.push(key);
                 } else {
-                    table.deselectRow(); // Deselect all rows
+                    // Remove the key from selectedKeys if unchecked
+                    selectedKeys = selectedKeys.filter(selectedKey => selectedKey !== key);
                 }
-            });
 
-            // Function to generate new file path based on preview filename
-            function generateNewFilePath(data) {
-                const previewFilename = generatePreviewFilename(data);
-                const filePath = data.files[0].path;
-                const directory = filePath.substring(0, filePath.lastIndexOf('\\') + 1); // Extract directory part
-                const extension = filePath.split('.').pop(); // Extract file extension
-                const cleanedPreviewFilename = previewFilename.replace(/[-_]\./, '.'); // Remove join operators before the file extension
-                const sanitizedFilename = cleanedPreviewFilename.replace(/[/:*?]/g, ''); // Remove all ':' '*' '?' and '/' characters
-                const newPath = directory + sanitizedFilename; // Concatenate directory with the new filename
-                return newPath;
-            }
-
-            // Highlight duplicates
-            function highlightDuplicates() {
-                const rows = table.getData();
-                const seen = new Set();
-                rows.forEach(row => {
-                    const titleValue = row.title;
-                    if (titleValue && seen.has(titleValue)) {
-                        table.getRow(row.id).getElement().style.backgroundColor = 'red';
-                    }
-                    seen.add(titleValue);
-                });
-            }
-
-            // Call highlightDuplicates function after setting data
-            table.getData().then(rows => {
-                const titleColumn = table.getColumn('title');
-                titleColumn.cells.forEach(cell => {
-                    highlightDuplicates(cell, rows);
-                });
+                // Regenerate preview filename based on selectedKeys and preferred wrapping character
+                table.updateColumnDefinition("previewFilename", { formatter: function(cell) {
+                    var data = cell.getRow().getData();
+                    var previewFilename = generatePreviewFilename(data);
+                    return previewFilename;
+                }});
             });
         });
-    </script>
+
+        // Function to generate preview filename
+        function generatePreviewFilename(data) {
+            // Initialize filename parts
+            var filenameParts = [];
+
+            // Get the file extension from the first file path
+            var extension = data.files[0].path.split('.').pop();
+
+            // Function to wrap text with the selected wrapper
+            function wrapText(text, wrapSelectId) {
+                var wrapSelect = document.getElementById(wrapSelectId);
+                var wrapperType = wrapSelect ? wrapSelect.value : 'none'; // Get the wrapping character
+
+                switch (wrapperType) {
+                    case "square":
+                        return "[" + text + "]";
+                    case "curly":
+                        return "{" + text + "}";
+                    case "parentheses":
+                        return "(" + text + ")";
+                    default:
+                        return text; // No wrapper or "none" selected
+                }
+            }
+
+            // Add keys based on the order of selected checkboxes
+            selectedKeys.forEach(function(key) {
+                var wrapSelectId = key.replace('-checkbox', '') + '-wrap-select'; // Construct the ID of the corresponding select element
+
+                if (key === 'studio-checkbox' && data.studio && data.studio.name) {
+                    filenameParts.push(wrapText(data.studio.name, wrapSelectId));
+                }
+                if (key === 'performer-checkbox' && data.performers && data.performers.length > 0) {
+                    var performerNames = data.performers.map(performer => performer.name).join(', ');
+                    filenameParts.push(wrapText(performerNames, wrapSelectId));
+                }
+                if (key === 'date-checkbox' && data.date) {
+                    filenameParts.push(wrapText(data.date, wrapSelectId));
+                }
+                if (key === 'title-checkbox' && data.title) {
+                    filenameParts.push(wrapText(data.title, wrapSelectId));
+                }
+            });
+
+            // Add file extension
+            filenameParts.push(extension ? "." + extension : ""); // Add '.' before the extension if it exists
+
+            // Join filename parts with a hyphen
+            var previewFilename = filenameParts.join('-');
+
+            return previewFilename;
+        }
+
+        // After the studios dropdown is populated and event listeners for checkboxes are set
+        document.querySelectorAll('select[id$="-wrap-select"]').forEach(function(select) {
+            select.addEventListener('change', function() {
+                // Trigger update on preview filenames whenever a designator is changed
+                table.redraw(true); // This forces a full table redraw and updates the preview filenames
+            });
+        });
+
+
+        // Select All checkbox functionality
+        document.getElementById('select-all-checkbox').addEventListener('change', function() {
+            if (this.checked) {
+                table.selectRow(); // Select all rows
+            } else {
+                table.deselectRow(); // Deselect all rows
+            }
+        });
+
+        // Function to generate new file path based on preview filename
+        function generateNewFilePath(data) {
+            const previewFilename = generatePreviewFilename(data);
+            const filePath = data.files[0].path;
+            const directory = filePath.substring(0, filePath.lastIndexOf('\\') + 1); // Extract directory part
+            const extension = filePath.split('.').pop(); // Extract file extension
+            const cleanedPreviewFilename = previewFilename.replace(/[-_]\./, '.'); // Remove join operators before the file extension
+            const sanitizedFilename = cleanedPreviewFilename.replace(/[/:*?]/g, ''); // Remove all ':' '*' '?' and '/' characters
+            const newPath = directory + sanitizedFilename; // Concatenate directory with the new filename
+            return newPath;
+        }
+
+        // Highlight duplicates
+        function highlightDuplicates() {
+            const rows = table.getData();
+            const seen = new Set();
+            rows.forEach(row => {
+                const titleValue = row.title;
+                if (titleValue && seen.has(titleValue)) {
+                    table.getRow(row.id).getElement().style.backgroundColor = 'red';
+                }
+                seen.add(titleValue);
+            });
+        }
+
+        // Call highlightDuplicates function after setting data
+        table.getData().then(rows => {
+            const titleColumn = table.getColumn('title');
+            titleColumn.cells.forEach(cell => {
+                highlightDuplicates(cell, rows);
+            });
+        });
+    });
+</script>
 </body>
 </html>

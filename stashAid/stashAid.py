@@ -223,22 +223,58 @@ def stash_scene_details():
     else:
         return render_template('stash_scene_details.html')
 
-# Route to handle file renaming
+@app.route('/switch_move_files_flag', methods=['POST'])
+def switch_move_files_flag():
+    try:
+        move_files_flag = request.json.get('moveFiles', False)  # Get the move files flag from the request
+        logger.info(f"Move files flag updated to: {move_files_flag}")
+        # Perform any other necessary actions based on the move files flag
+        return jsonify({'message': 'Move files flag updated successfully'}), 200
+    except Exception as e:
+        logger.error(f"Error updating move files flag: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/rename_file', methods=['POST'])
 def rename_file():
     try:
         data = request.json
+        logger.info(f"Received data: {data}")
+        
         old_path = Path(data.get('oldPath'))
         new_path = Path(data.get('newPath'))
+        move_files = data.get('moveFiles', False)
+        move_to_directory = data.get('moveToDirectory', None)
         
-        logger.info(f"Old Path: {old_path}")
-        logger.info(f"New Path: {new_path}")
+        logger.info(f"Old path: {old_path}, New path: {new_path}")
+        logger.info(f"Move files flag: {move_files}, Move to directory: {move_to_directory}")
+
+        # Ensure the new directory exists
+        if move_files and move_to_directory:
+            target_directory = Path(move_to_directory)
+            # Check if the directory already exists
+            if not os.path.exists(target_directory):
+                os.makedirs(target_directory, exist_ok=True)
+                logger.info(f"Target directory created: {target_directory}")
+            else:
+                logger.info(f"Target directory already exists: {target_directory}")
         
+        # Rename (move) the file to the new path
         old_path.rename(new_path)
+        logger.info(f"File renamed from {old_path} to {new_path}")
+
+        # Move the file to a new directory if requested
+        if move_files and move_to_directory:
+            final_path = target_directory / new_path.name
+            # Move the file to the final path
+            new_path.rename(final_path)
+            logger.info(f"File moved to {final_path}")
+        
         return jsonify({'message': 'File renamed successfully'})
     except Exception as e:
-        logger.error(f'Error renaming file: {e}', exc_info=True)
+        logger.error(f"Error renaming/moving file: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
 
 # Route to handle file deletion
 @app.route('/delete_file', methods=['POST'])
@@ -385,6 +421,53 @@ for task in tasks:
     except Exception as e:
         logger.error(f"Failed to schedule task {task['id']}: {str(e)}")
 
+import os
+from flask import jsonify, request
+
+# Route to handle file moves
+@app.route('/move_file', methods=['POST'])
+def move_file():
+    data = request.json
+    old_path = data.get('oldPath')
+    new_path = data.get('newPath')
+
+    try:
+        # Ensure the destination directory exists
+        if not os.path.exists(new_path):
+            os.makedirs(new_path)
+
+        # Extract filename from the old path
+        filename = os.path.basename(old_path)
+
+        # Construct the new file path
+        new_file_path = os.path.join(new_path, filename)
+
+        # Move the file to the new path
+        os.replace(old_path, new_file_path)
+
+        message = f"File '{filename}' moved successfully to {new_path}"
+        return jsonify({'message': message}), 200
+    except Exception as e:
+        error_message = str(e)
+        return jsonify({'error': error_message}), 500
+
+
+# Route to handle directory creation requests
+@app.route('/create_directory', methods=['POST'])
+def create_directory():
+    try:
+        directory = request.json.get('directory')
+        # Check if the directory already exists
+        if os.path.exists(directory):
+            logger.info(f"Directory already exists: {directory}")
+            return jsonify({'message': 'Directory already exists'}), 200
+        # Create the directory
+        os.makedirs(directory, exist_ok=True)
+        logger.info(f"Directory created successfully: {directory}")
+        return jsonify({'message': 'Directory created successfully'}), 200
+    except Exception as e:
+        logger.error(f"Error creating directory: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 # Start Flask app
