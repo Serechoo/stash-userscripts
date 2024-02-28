@@ -134,9 +134,49 @@ Stash Bulk File Renamer
             </select>
         </div>
     </div>
+	<div>
+    <input type="checkbox" id="quality-checkbox">
+    <label for="quality-checkbox">Quality</label>
+    <select id="quality-wrap-select">
+        <option value="none">None</option>
+        <option value="square">Square Brackets</option>
+        <option value="curly">Curly Braces</option>
+        <option value="parentheses">Parentheses</option>
+    </select>
+	</div>
+	<div>
+		<input type="checkbox" id="duration-checkbox">
+		<label for="duration-checkbox">Duration</label>
+		<select id="duration-wrap-select">
+			<option value="none">None</option>
+			<option value="square">Square Brackets</option>
+			<option value="curly">Curly Braces</option>
+			<option value="parentheses">Parentheses</option>
+		</select>
+	</div>
+	<div>
+		<input type="checkbox" id="fps-checkbox">
+		<label for="fps-checkbox">FPS</label>
+		<select id="fps-wrap-select">
+			<option value="none">None</option>
+			<option value="square">Square Brackets</option>
+			<option value="curly">Curly Braces</option>
+			<option value="parentheses">Parentheses</option>
+		</select>
+	</div>
+	<div>
+		<input type="checkbox" id="video-codec-checkbox">
+		<label for="video-codec-checkbox">Video Codec</label>
+		<select id="video-codec-wrap-select">
+			<option value="none">None</option>
+			<option value="square">Square Brackets</option>
+			<option value="curly">Curly Braces</option>
+			<option value="parentheses">Parentheses</option>
+		</select>
+	</div>
     <div>
         <input type="checkbox" id="select-all-checkbox">
-        <label for="select-all-checkbox">Select All</label><br>
+        <label for="select-all-checkbox">Select All Files</label><br>
     </div>
     <div id="tabulator-table"></div>
     <button id="rename-button" class="rename-button">Rename Files</button>
@@ -158,10 +198,59 @@ Stash Bulk File Renamer
                 { title: "Scene ID", field: "id", widthGrow: 1 },
                 { title: "Title", field: "title", widthGrow: 1 },
                 { title: "Studio Name", field: "studio.name", widthGrow: 1 },
+				{ title: "Studio ID", field: "studio.id", widthGrow: 1 },
                 { title: "Performer Name", field: "performers", formatter: function(cell) {
                     return cell.getValue().map(performer => performer.name).join(', ');
                 }, widthGrow: 1 },
                 { title: "Date", field: "date", widthGrow: 1 },
+				{ 
+					title: "Quality", 
+					field: "files.0.height", 
+					widthGrow: 1,
+					formatter: function(cell) {
+						var quality = cell.getValue(); // Assuming 'height' represents quality
+						return quality ? quality + 'p' : ''; // Append 'p' to quality if available
+					}
+				},
+				{ 
+					title: "Duration", 
+					field: "files.0.duration", 
+					widthGrow: 1,
+					formatter: function(cell) {
+						var duration = cell.getValue(); // Assuming 'duration' is in seconds
+						var hours = Math.floor(duration / 3600);
+						var minutes = Math.floor((duration % 3600) / 60);
+						var seconds = duration % 60;
+						
+						// Constructing the formatted duration string
+						var formattedDuration = '';
+						if (hours > 0) {
+							formattedDuration += (hours < 10 ? '0' : '') + hours + 'h ';
+						}
+						formattedDuration += (minutes < 10 ? '0' : '') + minutes + 'm ';
+						formattedDuration += (seconds < 10 ? '0' : '') + seconds.toFixed(0) + 's';
+						
+						return formattedDuration;
+					}
+				},
+				{ 
+					title: "FPS", 
+					field: "files.0.frame_rate", 
+					widthGrow: 1,
+					formatter: function(cell) {
+						var fps = cell.getValue(); // Get the FPS value
+						return fps ? fps + ' FPS' : ''; // Append ' FPS' to FPS value if available
+					}
+				},
+				{ 
+					title: "Video Codec", 
+					field: "files.0.video_codec", 
+					widthGrow: 1,
+					formatter: function(cell) {
+						var codec = cell.getValue(); // Get the video codec value
+						return codec ? codec.toUpperCase() : ''; // Convert the codec value to uppercase if available
+					}
+				},
                 { title: "File Path", field: "files", formatter: function(cell) {
                     return cell.getValue().map(file => file.path).join('<br>');
                 }, widthGrow: 1 },
@@ -192,14 +281,19 @@ Stash Bulk File Renamer
                                 id
                                 title
                                 studio {
-                                    name
+                                    id
+									name
                                 }
                                 performers {
                                     name
                                 }
                                 date
                                 files {
-                                    path
+                                    height
+									duration
+									video_codec
+									frame_rate
+									path
                                 }
                             }
                         }
@@ -473,34 +567,60 @@ Stash Bulk File Renamer
                         return text; // No wrapper or "none" selected
                 }
             }
+		
+			// Add keys based on the order of selected checkboxes
+			selectedKeys.forEach(function(key) {
+				var wrapSelectId = key.replace('-checkbox', '') + '-wrap-select'; // Construct the ID of the corresponding select element
+		
+				if (key === 'studio-checkbox' && data.studio && data.studio.name) {
+					filenameParts.push(wrapText(data.studio.name, wrapSelectId));
+				}
+				if (key === 'performer-checkbox' && data.performers && data.performers.length > 0) {
+					var performerNames = data.performers.map(performer => performer.name).join(', ');
+					filenameParts.push(wrapText(performerNames, wrapSelectId));
+				}
+				if (key === 'date-checkbox' && data.date) {
+					filenameParts.push(wrapText(data.date, wrapSelectId));
+				}
+				if (key === 'title-checkbox' && data.title) {
+					filenameParts.push(wrapText(data.title, wrapSelectId));
+				}
+				if (key === 'quality-checkbox' && data.files[0].height) {
+					var quality = data.files[0].height;
+					filenameParts.push(wrapText(quality + 'p', wrapSelectId));
+				}
+				if (key === 'duration-checkbox' && data.files[0].duration) {
+					var duration = data.files[0].duration;
+					var hours = Math.floor(duration / 3600);
+					var minutes = Math.floor((duration % 3600) / 60);
+					var seconds = duration % 60;
+					var formattedDuration = '';
+					if (hours > 0) {
+						formattedDuration += (hours < 10 ? '0' : '') + hours + 'h ';
+					}
+					formattedDuration += (minutes < 10 ? '0' : '') + minutes + 'm ';
+					formattedDuration += (seconds < 10 ? '0' : '') + seconds.toFixed(0) + 's';
+					filenameParts.push(wrapText(formattedDuration, wrapSelectId));
+				}
+				if (key === 'fps-checkbox' && data.files[0].frame_rate) {
+					var fps = data.files[0].frame_rate;
+					filenameParts.push(wrapText(fps + ' FPS', wrapSelectId));
+				}
+				if (key === 'video-codec-checkbox' && data.files[0].video_codec) {
+					var codec = data.files[0].video_codec;
+					filenameParts.push(wrapText(codec.toUpperCase(), wrapSelectId));
+				}
+			});
+		
+			// Add file extension
+			filenameParts.push(extension ? "." + extension : ""); // Add '.' before the extension if it exists
+		
+			// Join filename parts with a hyphen
+			var previewFilename = filenameParts.join('-');
+		
+			return previewFilename;
+		}
 
-            // Add keys based on the order of selected checkboxes
-            selectedKeys.forEach(function(key) {
-                var wrapSelectId = key.replace('-checkbox', '') + '-wrap-select'; // Construct the ID of the corresponding select element
-
-                if (key === 'studio-checkbox' && data.studio && data.studio.name) {
-                    filenameParts.push(wrapText(data.studio.name, wrapSelectId));
-                }
-                if (key === 'performer-checkbox' && data.performers && data.performers.length > 0) {
-                    var performerNames = data.performers.map(performer => performer.name).join(', ');
-                    filenameParts.push(wrapText(performerNames, wrapSelectId));
-                }
-                if (key === 'date-checkbox' && data.date) {
-                    filenameParts.push(wrapText(data.date, wrapSelectId));
-                }
-                if (key === 'title-checkbox' && data.title) {
-                    filenameParts.push(wrapText(data.title, wrapSelectId));
-                }
-            });
-
-            // Add file extension
-            filenameParts.push(extension ? "." + extension : ""); // Add '.' before the extension if it exists
-
-            // Join filename parts with a hyphen
-            var previewFilename = filenameParts.join('-');
-
-            return previewFilename;
-        }
 
         // After the studios dropdown is populated and event listeners for checkboxes are set
         document.querySelectorAll('select[id$="-wrap-select"]').forEach(function(select) {
