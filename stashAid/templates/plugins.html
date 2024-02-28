@@ -55,12 +55,29 @@
             max-height: 500px; /* Adjust the height as needed */
             overflow-y: auto;
         }
+		/* CSS for the search input */
+		.search-input {
+			margin-bottom: 1rem;
+			transition: background-color 0.3s; /* Add transition for smooth color change */
+		}
+		
+		/* CSS to style the search input text */
+		.search-input:focus {
+			outline: none; /* Remove the default focus outline */
+			border-color: cyan; /* Set the border color to cyan when focused */
+			background-color: rgba(0, 255, 255, 0.1); /* Darker shade of cyan when focused */
+			box-shadow: 0 0 0 0.25rem rgba(0, 255, 255, 0.25); /* Add a cyan box shadow when focused */
+		}
     </style>
 </head>
 <body>
 
 <div class="container mt-5">
     <h1 class="mb-4">Plugin Manager</h1>
+	<!-- Search Bar -->
+    <div class="mb-3">
+        <input type="text" class="form-control" id="searchInput" placeholder="Search plugins...">
+    </div>
     
     <!-- Available Plugins Section -->
     <div class="mb-5">
@@ -337,6 +354,39 @@
 
     // Call the function to render available plugins
     renderAvailablePlugins();
+</script>
+<script>
+    // Function to filter plugins based on search query
+    function filterPlugins(searchQuery) {
+        const rows = document.querySelectorAll('#available-plugins tr');
+        rows.forEach(row => {
+            const nameColumn = row.querySelector('td:first-child');
+            if (nameColumn) {
+                const name = nameColumn.textContent.toLowerCase();
+                if (name.includes(searchQuery.toLowerCase())) {
+                    row.style.display = '';
+                    highlightMatch(nameColumn, searchQuery);
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Function to highlight matching words in a column
+    function highlightMatch(element, searchQuery) {
+        const text = element.textContent;
+        const regex = new RegExp(`(${searchQuery})`, 'gi');
+        const highlightedText = text.replace(regex, '<span style="color: cyan;">$1</span>');
+        element.innerHTML = highlightedText;
+    }
+
+    // Add event listener to search input
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
+        const searchQuery = this.value.trim();
+        filterPlugins(searchQuery);
+    });
 </script>
 </body>
 </html>
