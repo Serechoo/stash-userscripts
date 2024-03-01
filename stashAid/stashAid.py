@@ -12,6 +12,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import json
 from apscheduler.jobstores.base import JobLookupError
+import mimetypes
+from flask import send_from_directory, abort
+from setproctitle import setproctitle
+
+# Set the process title
+setproctitle("stashAid.py")
 
 # Initialize Flask app
 app = Flask(__name__, static_url_path='/static')
@@ -41,6 +47,9 @@ flask_server_pid = os.getpid()
 # List to store tasks
 tasks = []
 
+# Define the base directory for videos
+VIDEO_BASE_DIR = os.path.join(app.static_folder, 'videos')
+
 # Function to execute a script
 def execute_script(script_id):
     script_info = script_paths.get(script_id)
@@ -56,20 +65,45 @@ def execute_script(script_id):
 def stream_output(process):
     for line in iter(process.stdout.readline, ''):
         yield 'data: {}\n\n'.format(line.strip())
-        
-# Schedule tasks with APScheduler
-# Example task: execute the 'metadata_scan' script every day at 2:00 AM
-scheduler.add_job(execute_script, 'cron', args=['metadata_scan'], hour=23, minute=30)
 
 # Route to serve index.html template
 @app.route('/')
 def index():
     return render_template('index.html', app_name="Stash Assistant")
 
+# Get the directory of the currently executing script
+current_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Set the working directory to the directory of the Flask application script
+os.chdir(current_directory)
+
+# Dictionary to map script IDs to script paths for execution
+execute_script_paths = {
+    "export_performer_images": "./python-scripts/Performer Image Export/stash_performer_image_export.py",
+    "gallery_scraper": "./node-scripts/Performer Gallery Scraper/gallery_scraper.js",
+    "movie_fy": "./python-scripts/Movie-Fy/movie_fy.py"
+    # Add more script IDs and paths as needed
+}
+
+# Dictionary to keep track of script execution count
+script_execution_count = {}
+
+# Dictionary to store running processes
+running_processes = {}
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Function to execute a script
+def execute_script(script_path):
+    return subprocess.Popen(["python", script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
 # Route to execute a script
 @app.route('/execute_script/<script_id>')
 def execute_script_route(script_id):
-    if script_id in script_paths:
+    if script_id in execute_script_paths:
+        script_path = execute_script_paths[script_id]  # Get the script path for the given script ID
         if script_id in script_execution_count:
             # Check if the script has already been executed once
             if script_execution_count[script_id] > 0:
@@ -78,7 +112,7 @@ def execute_script_route(script_id):
         script_execution_count[script_id] = script_execution_count.get(script_id, 0) + 1
 
         try:
-            process = execute_script(script_id)
+            process = execute_script(script_path)  # Pass the script path to the execute_script function
             running_processes[script_id] = process
             
             # Read output from the script and log it
@@ -90,6 +124,7 @@ def execute_script_route(script_id):
             return jsonify({'error': str(e)}), 500
     else:
         return jsonify({'error': 'Invalid script ID'}), 400
+
 
 # Route to terminate a script
 @app.route('/terminate_script/<script_type>', methods=['POST'])
@@ -188,19 +223,29 @@ def get_files(directory):
     else:
         return jsonify({'error': 'Directory not found'}), 404    
 
-# Route to restart the Stash Assistant
-@app.route('/restart_stash_assistant', methods=['POST'])
-def restart_stash_assistant():
+@app.route('/restart_stashaid', methods=['POST'])
+def restart_stashaid():
     try:
-        # Gracefully stop the server
-        shutdown_server()
-        # Allow time for the server to shut down
-        time.sleep(1)
-        # Restart the server
-        python = sys.executable
-        os.execl(python, python, *sys.argv)
+        # Log that the restart process is initiated
+        logger.info("Restart process initiated")
+        
+        # Execute the restart script and capture its output
+        process = subprocess.Popen(['python', 'restart_stashaid.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        
+        if process.returncode == 0:
+            # Log the successful completion of the restart process
+            logger.info("Restart process completed successfully")
+            return {'message': 'Restart process completed successfully'}, 200
+        else:
+            # Log any errors that occurred during the restart process
+            logger.error(f"Restart process failed with error: {stderr.decode()}")
+            return {'error': f'Restart process failed: {stderr.decode()}'}, 500
+            
     except Exception as e:
-        return jsonify({'error': f'Failed to restart Stash Assistant: {str(e)}'}), 500
+        # Log any exceptions that occurred during the restart process
+        logger.error(f'Failed to initiate restart process: {str(e)}')
+        return {'error': f'Failed to initiate restart process: {str(e)}'}, 500
 
 # Route to serve custom.css file
 @app.route('/custom.css')
@@ -302,11 +347,6 @@ def delete_file():
 @app.route('/stash_data')
 def stash_data():
     return render_template('stash_data.html')
-
-# Route to serve admin.html template
-@app.route('/admin')
-def admin():
-    return render_template('admin.html')
 
 # Route to view logs
 @app.route('/logs')
@@ -479,6 +519,96 @@ def create_directory():
         logger.error(f"Error creating directory: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+# Function to scan the videos directory and organize clips by movie
+def scan_videos_directory(directory):
+    video_clips = {}
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith('.webm'):
+                movie_name = os.path.basename(root)
+                if movie_name not in video_clips:
+                    video_clips[movie_name] = []
+                video_clips[movie_name].append({'filename': file})
+    
+    # Sort video clips within each movie by filename
+    for movie_name, clips in video_clips.items():
+        video_clips[movie_name] = sorted(clips, key=lambda x: x['filename'])
+    
+    return video_clips
+
+# Route to serve the movies page
+@app.route('/movies')
+def movies():
+    # Path to the directory containing video clips
+    video_directory = os.path.join(app.static_folder, 'videos')
+    # Scan the videos directory
+    video_clips = scan_videos_directory(video_directory)
+    return render_template('movies.html', video_clips=video_clips)
+
+import flask
+import os
+
+# Route to serve video files
+@app.route('/static/videos/<movie>/<filename>')
+def serve_video(movie, filename):
+    try:
+        video_path = os.path.join(VIDEO_BASE_DIR, movie, filename)
+        
+        # Check if the video file exists
+        if not os.path.exists(video_path):
+            return 'Video not found', 404
+        
+        # Open the video file
+        video_file = open(video_path, 'rb')
+        video_size = os.path.getsize(video_path)
+        
+        # Serve the entire file without considering range requests
+        return flask.send_file(video_file, mimetype='video/webm')
+    except Exception as e:
+        # Log the error
+        logger.error(f"Error serving video {movie}/{filename}: {str(e)}")
+        # Close the file if it's open
+        if 'video_file' in locals():
+            video_file.close()
+        # Return a meaningful error response
+        return 'Error serving video', 500
+
+
+# Route to play video
+@app.route('/play_video/<path:filename>')
+def play_video(filename):
+    video_path = os.path.join(VIDEO_BASE_DIR, filename)
+    if os.path.exists(video_path):
+        try:
+            return send_from_directory(VIDEO_BASE_DIR, filename, mimetype='video/webm', as_attachment=False)
+        except Exception as e:
+            logger.error(f"Error playing video {filename}: {str(e)}")
+            abort(500)
+    else:
+        logger.error(f"Video not found: {filename}")
+        abort(404)
+
+
+def convert_to_webm(input_file, output_file):
+    # Run FFmpeg command to convert video to WebM
+    subprocess.run(['ffmpeg', '-i', input_file, '-c:v', 'libvpx', '-b:v', '1M', '-c:a', 'libvorbis', output_file])
+
+import os
+
+@app.route('/convert_to_webm')
+def convert_to_webm():
+    video_dir = os.path.join(app.static_folder, 'videos')  # Directory containing MP4 files
+    for root, dirs, files in os.walk(video_dir):
+        for file in files:
+            if file.endswith('.mp4'):
+                mp4_path = os.path.join(root, file)
+                webm_path = os.path.splitext(mp4_path)[0] + '.webm'
+                try:
+                    subprocess.run(['ffmpeg', '-i', mp4_path, webm_path])
+                    os.remove(mp4_path)  # Remove the .mp4 file
+                except Exception as e:
+                    return jsonify({'error': str(e)}), 500
+    return jsonify({'message': 'Conversion to WebM completed successfully.'}), 200
 
 # Start Flask app
 if __name__ == '__main__':
