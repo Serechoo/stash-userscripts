@@ -27,3 +27,9 @@ This will not click the 'Save All' button, and let the user review the added Per
 Included the functionality to batch add any outstanding tags on the page.
 
 Implemented a basic progress tracker of the overall task that will show as a percentage completion bar and give an estimated time until completion.
+
+# Batch Create All - Stash 0.4
+
+This is now a Custom JS you can copy and paste into the 'Custom Javascript' option in your 'Interface' options. 
+
+If the 'Create All' button does not show on first load, reload the page and it should appear and be functional.
