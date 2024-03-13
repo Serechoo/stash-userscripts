@@ -28,5 +28,7 @@ For any questions or assistance, feel free to reach out in the Stash Discord com
 
 Start with a few movies to understand the workflow before bulk updating your movie collection into Stash.
 
+To give Movie-Fy the best chances of finding a match, clean up your file names/scene titles first! ie. awesome-scene-title-15-scene4(1999) --> Awesome Scene Title 15 - Scene 4
+
 Enjoy organizing your movies with Movie-Fy!
 
