@@ -1,6 +1,6 @@
 # Movie-Fy
 
-The Movie-fy tool is designed to assist in managing and creating movies within Stash.
+The Movie-Fy tool is designed to assist in managing and creating movies within Stash.
 
 ## Instructions
 
