@@ -1,4 +1,4 @@
-# Movie-Fy
+# Movie-Fy (0.1)
 
 The Movie-Fy tool is designed to assist in managing and creating movies within Stash.
 
