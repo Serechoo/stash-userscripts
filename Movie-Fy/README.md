@@ -28,5 +28,5 @@ For any questions or assistance, feel free to reach out in the Stash Discord com
 
 Start with a few movies to understand the workflow before bulk updating your movie collection into Stash.
 
-Enjoy organizing your movies with Movie-fy!
+Enjoy organizing your movies with Movie-Fy!
 
