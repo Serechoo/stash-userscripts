@@ -1,6 +1,8 @@
 import re
 import requests
+import stashapi.log as log  # Importing progress tracking module
 
+# Function to find studio ID
 def find_studio_id(studio_name):
     find_studios_url = "http://localhost:9999/graphql"
     find_studios_payload = {
@@ -29,8 +31,7 @@ def find_studio_id(studio_name):
         print("Error finding studios:", result.get("errors"))
         return None
 
-import requests
-
+# Function to find scenes
 def find_scenes(studio_id):
     find_scenes_url = "http://localhost:9999/graphql"
     find_scenes_payload = {
@@ -58,7 +59,7 @@ def find_scenes(studio_id):
         print("Error finding scenes:", result.get("errors"))
         return None
 
-
+# Function to find scene details
 def find_scene_details(scene_id):
     find_scene_query = f"""
         query FindScene {{
@@ -80,6 +81,7 @@ def find_scene_details(scene_id):
         print("Error finding scene details:", result.get("errors"))
         return None
 
+# Function to update title with basename
 def update_title_with_basename(scene_id, file_basename):
     # Use regex to remove file extension
     title = re.sub(r'\.[^.]*$', '', file_basename)
@@ -115,8 +117,8 @@ if __name__ == "__main__":
 
         if scenes:
             print(f"\nScenes for Studio '{studio_name}':")
-            for scene in scenes:
-                print(f"Scene ID: {scene['id']}, Title: {scene['title']}")
+            total_scenes = len(scenes)
+            processed_scenes = 0
 
             print("\nChecking and updating titles:")
             for scene in scenes:
@@ -135,8 +137,13 @@ if __name__ == "__main__":
                         update_title_with_basename(scene['id'], file_basename)
                     else:
                         print("No action needed. Scene already has a title or is missing a file basename.")
-                else:
-                    print(f"Could not retrieve scene details for Scene ID: {scene['id']}")
+                
+                # Update progress
+                processed_scenes += 1
+                progress = processed_scenes / total_scenes
+                log.progress(progress)
+
+            print("\nProcessing complete.")
         else:
             print(f"No scenes found for Studio '{studio_name}'.")
     else:

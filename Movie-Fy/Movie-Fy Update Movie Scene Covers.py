@@ -1,4 +1,5 @@
 import requests
+import stashapi.log as log  # Importing progress tracking module
 
 # Define the GraphQL queries
 all_movies_query = """
@@ -33,11 +34,14 @@ def update_scene_cover_images():
     if "data" in data and "allMovies" in data["data"]:
         all_movies = data["data"]["allMovies"]
         
+        total_movies = len(all_movies)
+        processed_movies = 0
+
         for movie in all_movies:
             movie_id = movie["id"]
             front_image_path = movie["front_image_path"]
             scenes = movie["scenes"]
-            
+
             # Update each scene with the movie's front image path
             for scene in scenes:
                 scene_id = scene["id"]
@@ -54,6 +58,11 @@ def update_scene_cover_images():
                     print(f"Updated scene {scene_id} cover image with movie front image for movie {movie_id}")
                 else:
                     print(f"Failed to update scene {scene_id} cover image for movie {movie_id}")
+                
+            # Update progress for movies
+            processed_movies += 1
+            progress = processed_movies / total_movies
+            log.progress(progress)
 
 if __name__ == "__main__":
     update_scene_cover_images()

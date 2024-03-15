@@ -1,6 +1,7 @@
 import requests
+import stashapi.log as log
 
-# GraphQL queries
+# GraphQL queries (unchanged)
 all_movies_query = """
 query AllMovies {
     allMovies {
@@ -38,10 +39,10 @@ mutation MovieUpdate($id: ID!, $name: String!, $date: String!, $synopsis: String
 }
 """
 
-# GraphQL endpoint
+# GraphQL endpoint (unchanged)
 graphql_endpoint = "http://localhost:9999/graphql"
 
-# Function to send GraphQL queries
+# Function to send GraphQL queries (unchanged)
 def send_query(query, variables=None):
     payload = {"query": query}
     if variables:
@@ -49,40 +50,51 @@ def send_query(query, variables=None):
     response = requests.post(graphql_endpoint, json=payload)
     return response.json()
 
-# Step 1: Fetch all movies and their URLs
-response = send_query(all_movies_query)
-movies = response["data"]["allMovies"]
+if __name__ == "__main__":
+    # Step 1: Fetch all movies and their URLs
+    response = send_query(all_movies_query)
+    movies = response["data"]["allMovies"]
+    total_movies = len(movies)
+    processed_movies = 0
 
-# Step 2-5: Iterate through movies, scrape metadata, and update records
-for movie in movies:
-    movie_id = movie["id"]
-    movie_name = movie["name"]
-    movie_url = movie["url"]
-    
-    # Step 3: Send GraphQL query to scrape metadata
-    scrape_variables = {"url": movie_url}
-    scrape_response = send_query(scrape_movie_query, variables=scrape_variables)
-    scraped_data = scrape_response["data"]["scrapeMovieURL"]
-    
-    # Step 4: Extract scraped metadata
-    name = scraped_data.get("name", "")
-    date = scraped_data.get("date", "")
-    synopsis = scraped_data.get("synopsis", "")
-    front_image = scraped_data.get("front_image", "")
-    back_image = scraped_data.get("back_image", "")
+    print("Scraping and updating movies...")
 
-    
-    # Step 5: Send GraphQL mutation to update movie record
-    update_variables = {
-        "id": movie_id,
-        "name": name,
-        "date": date,
-        "synopsis": synopsis,
-        "front_image": front_image,
-        "back_image": back_image
-    }
-    update_response = send_query(movie_update_mutation, variables=update_variables)
-    if "errors" in update_response:
-        print(f"Failed to update movie {movie_name}: {update_response['errors']}")
-    else:
-        print(f"Movie {movie_name} updated successfully.")
+    # Iterating through movies
+    for movie in movies:
+        movie_id = movie["id"]
+        movie_name = movie["name"]
+        movie_url = movie["url"]
+        
+        # Step 3: Send GraphQL query to scrape metadata
+        scrape_variables = {"url": movie_url}
+        scrape_response = send_query(scrape_movie_query, variables=scrape_variables)
+        scraped_data = scrape_response["data"]["scrapeMovieURL"]
+        
+        # Step 4: Extract scraped metadata (unchanged)
+        name = scraped_data.get("name", "")
+        date = scraped_data.get("date", "")
+        synopsis = scraped_data.get("synopsis", "")
+        front_image = scraped_data.get("front_image", "")
+        back_image = scraped_data.get("back_image", "")
+
+        # Step 5: Send GraphQL mutation to update movie record
+        update_variables = {
+            "id": movie_id,
+            "name": name,
+            "date": date,
+            "synopsis": synopsis,
+            "front_image": front_image,
+            "back_image": back_image
+        }
+        update_response = send_query(movie_update_mutation, variables=update_variables)
+        if "errors" in update_response:
+            print(f"Failed to update movie {movie_name}: {update_response['errors']}")
+        else:
+            print(f"Movie {movie_name} updated successfully.")
+
+        # Update progress
+        processed_movies += 1
+        progress = processed_movies / total_movies
+        log.progress(progress)
+
+    print("All movies scraped and updated successfully.")
