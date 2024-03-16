@@ -72,10 +72,7 @@ def main():
                 print(f"Updating scene {scene_id} with studio ID {movie_studio_id}")
                 update_scene_studio(scene_id, movie_studio_id)
             
-            # Update progress for scenes
             processed_scenes += 1
-            scene_progress = processed_scenes / total_scenes
-            log.progress(scene_progress)
 
         # Update progress for movies
         processed_movies += 1
