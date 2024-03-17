@@ -1,6 +1,6 @@
-# create_movie_studio.py
 import sys
 import requests
+import stashapi.log as log  # Importing log module
 
 # Function to create a new Movie Studio or retrieve an existing one
 def create_movie_studio():
@@ -30,20 +30,20 @@ def create_movie_studio():
         if "data" in result and "studioCreate" in result["data"]:
             return result["data"]["studioCreate"]["id"]
         else:
-            print("Error creating movie studio:", result.get("errors"))
+            log.error("Error creating movie studio:", result.get("errors"))
             return None
 
     except requests.exceptions.HTTPError as e:
         if response.status_code == 400:
             # Assuming a 400 status code indicates that the studio already exists
-            print("Movie studio already exists.")
+            log.info("Movie studio already exists.")
             return None
         else:
-            print(f"HTTP error during studio creation: {e}")
+            log.error(f"HTTP error during studio creation: {e}")
             return None
 
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        log.error(f"An unexpected error occurred: {e}")
         return None
 
 if __name__ == "__main__":
@@ -51,6 +51,6 @@ if __name__ == "__main__":
     studio_id = create_movie_studio()
 
     if studio_id is not None:
-        print("Created or retrieved Movie Studio with ID:", studio_id)
+        log.info("Created or retrieved Movie Studio with ID:", studio_id)
     else:
-        print("Failed to create or retrieve movie studio.")
+        log.error("Failed to create or retrieve movie studio.")
