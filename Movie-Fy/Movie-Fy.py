@@ -2,6 +2,10 @@ import json
 import requests
 from thefuzz import process
 
+# Global variable to store scene IDs
+scene_ids = []
+current_scene_index = 0
+
 # Function to find studio ID
 def find_studio_id():
     find_studios_url = "http://localhost:9999/graphql"
@@ -171,8 +175,19 @@ def parse_movie_titles(search_term):
     modified_search_term = re.sub(r'\s-.*', '', modified_search_term)
     return modified_search_term.strip()
 
+# Function to perform a custom search for a scene
+def perform_custom_search():
+    global current_scene_index
+    custom_search_term = input("Enter a custom search term: ")
+    if current_scene_index < len(scene_ids):
+        print(f"Using scene ID '{scene_ids[current_scene_index]}' for custom search.")
+    return custom_search_term
+
+
 # Main function
 def main():
+    global scene_ids, current_scene_index, previous_movie_id, previous_custom_search_term  # Declare global variables
+
     print("Starting process...")
     # Find studio ID
     studio_id = find_studio_id()
@@ -182,6 +197,8 @@ def main():
         scenes = find_scenes(studio_id)
         if scenes:
             print(f"Found {len(scenes)} scenes.")
+            # Store scene IDs
+            scene_ids = [scene['id'] for scene in scenes]
             # Load movie data from file
             try:
                 with open('Movie-Fy URLs.json', 'r', encoding='utf-8') as json_file:
@@ -208,7 +225,7 @@ def main():
             # Process each scene
             previous_movie_id = None
             previous_custom_search_term = None
-            for scene in scenes:
+            for current_scene_index, scene in enumerate(scenes):
                 print(f"Processing scene: {scene['title']}")
                 # Parse movie details from the scene title
                 parsed_title = parse_movie_titles(scene['title'])
@@ -361,3 +378,4 @@ def main():
 # Entry point
 if __name__ == "__main__":
     main()
+

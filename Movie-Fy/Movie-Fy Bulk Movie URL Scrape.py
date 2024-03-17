@@ -65,6 +65,10 @@ if __name__ == "__main__":
         movie_name = movie["name"]
         movie_url = movie["url"]
         
+        if not movie_url:
+            print(f"Skipping movie '{movie_name}' due to blank URL.")
+            continue
+
         # Step 3: Send GraphQL query to scrape metadata
         scrape_variables = {"url": movie_url}
         scrape_response = send_query(scrape_movie_query, variables=scrape_variables)
