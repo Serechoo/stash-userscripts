@@ -1,7 +1,7 @@
 import requests
 import stashapi.log as log
 
-# GraphQL queries (unchanged)
+# GraphQL queries
 all_movies_query = """
 query AllMovies {
     allMovies {
@@ -39,10 +39,10 @@ mutation MovieUpdate($id: ID!, $name: String!, $date: String!, $synopsis: String
 }
 """
 
-# GraphQL endpoint (unchanged)
+# GraphQL endpoint
 graphql_endpoint = "http://localhost:9999/graphql"
 
-# Function to send GraphQL queries (unchanged)
+# Function to send GraphQL queries
 def send_query(query, variables=None):
     payload = {"query": query}
     if variables:
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     total_movies = len(movies)
     processed_movies = 0
 
-    print("Scraping and updating movies...")
+    log.info("Scraping and updating movies...")
 
     # Iterating through movies
     for movie in movies:
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         movie_url = movie["url"]
         
         if not movie_url:
-            print(f"Skipping movie '{movie_name}' due to blank URL.")
+            log.warning(f"Skipping movie '{movie_name}' due to blank URL.")
             continue
 
         # Step 3: Send GraphQL query to scrape metadata
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         scrape_response = send_query(scrape_movie_query, variables=scrape_variables)
         scraped_data = scrape_response["data"]["scrapeMovieURL"]
         
-        # Step 4: Extract scraped metadata (unchanged)
+        # Step 4: Extract scraped metadata
         name = scraped_data.get("name", "")
         date = scraped_data.get("date", "")
         synopsis = scraped_data.get("synopsis", "")
@@ -92,13 +92,13 @@ if __name__ == "__main__":
         }
         update_response = send_query(movie_update_mutation, variables=update_variables)
         if "errors" in update_response:
-            print(f"Failed to update movie {movie_name}: {update_response['errors']}")
+            log.error(f"Failed to update movie {movie_name}: {update_response['errors']}")
         else:
-            print(f"Movie {movie_name} updated successfully.")
+            log.info(f"Movie {movie_name} (ID: {movie_id}) updated successfully.")  # Log the name and ID of the updated movie
 
         # Update progress
         processed_movies += 1
         progress = processed_movies / total_movies
         log.progress(progress)
 
-    print("All movies scraped and updated successfully.")
+    log.info("All movies scraped and updated successfully.")
