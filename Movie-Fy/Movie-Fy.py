@@ -65,13 +65,19 @@ def find_scenes(studio_id):
         print(f"Error parsing JSON response: {e}")
         return None
 
-# Function to find movie information with fuzzy matching
+# Function to find movie information with fuzzy matching and lexigraphical sorting
 def find_movie_info(movie_name, movie_data):
     matches = []
+    unique_urls = set()  # Set to store unique URLs
     for entry in movie_data:
         match_ratio = process.extractOne(movie_name.lower(), [entry.get('Name', '').lower()])
         if match_ratio[1] >= 90:  # Adjust threshold as needed
-            matches.append(entry)
+            # Check if URL is unique before adding to matches
+            if entry['Source'] not in unique_urls:
+                matches.append(entry)
+                unique_urls.add(entry['Source'])
+    # Sort matches lexigraphically by movie name
+    matches.sort(key=lambda x: (re.split(r'(\d+)', x['Name'].lower()), x['Name']))
     return matches
 
 # Function to create a new movie with title and URL
