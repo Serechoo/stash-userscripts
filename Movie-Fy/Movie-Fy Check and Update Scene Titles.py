@@ -34,7 +34,10 @@ def find_scenes(studio_id):
     find_scenes_payload = {
         "query": f"""
             query FindScenes {{
-                findScenes(scene_filter: {{ studios: {{ value: "{studio_id}", modifier: EQUALS }} }}) {{
+                findScenes(
+                    scene_filter: {{ studios: {{ value: "{studio_id}", modifier: EQUALS }} }},
+                    filter: {{ per_page: -1 }}
+                ) {{
                     scenes {{
                         id
                         title
