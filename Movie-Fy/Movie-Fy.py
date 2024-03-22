@@ -192,7 +192,7 @@ def perform_custom_search():
 
 # Main function
 def main():
-    global scene_ids, current_scene_index, previous_movie_id, previous_custom_search_term  # Declare global variables
+    global scene_ids, current_scene_index, previous_movie_id, previous_custom_search_term, previous_fuzzy_matches  # Declare global variables
 
     print("Starting process...")
     # Find studio ID
@@ -231,6 +231,7 @@ def main():
             # Process each scene
             previous_movie_id = None
             previous_custom_search_term = None
+            previous_fuzzy_matches = None
             for current_scene_index, scene in enumerate(scenes):
                 print(f"Processing scene: {scene['title']}")
                 # Parse movie details from the scene title
@@ -243,8 +244,12 @@ def main():
                         existing_movie_id = movie['id']
                         break
                 if existing_movie_id:
-                    print(f"Movie '{movie_name}' already exists with ID {existing_movie_id}. Skipping scene.")
-                    continue  # Skip processing for this scene
+                    print(f"Movie '{movie_name}' already exists with ID {existing_movie_id}. Adding scenes to this movie.")
+                    if update_scenes_with_movie(scene['id'], existing_movie_id):
+                        print(f"Scenes successfully added to movie {existing_movie_id}.")
+                    else:
+                        print(f"Failed to add scenes to movie {existing_movie_id}.")
+                    continue  # Move to the next scene
 
                 # Find movie info from parsed title
                 movie_matches = find_movie_info(movie_name, movie_data)
@@ -252,55 +257,59 @@ def main():
                 # Display fuzzy matched movies for the user to choose from
                 if movie_matches:
                     print(f"Fuzzy matched movies for '{scene['title']}':")
+                    fuzzy_matches = []
                     for i, match in enumerate(movie_matches, start=1):
                         print(f"{i}. {match['Name']} ({match['Source']})")
-                    choice = input("Enter the number of the correct match, 'c' to perform a custom search, or 's' to skip: ")
-                    if choice.lower() == 'c':
-                        if previous_custom_search_term:
-                            use_previous = input(f"Do you want to use the previous custom search term '{previous_custom_search_term}'? (y/n): ")
-                            if use_previous.lower() == 'y':
-                                custom_search_term = previous_custom_search_term
+                        fuzzy_matches.append((match['Name'], match['Source']))  # Storing fuzzy matches
+                    while True:
+                        choice = input("Enter the number of the correct match, 'c' to perform a custom search, 's' to skip, or 'r' to restart: ")
+                        if choice.lower() == 'c':
+                            # Perform a custom search
+                            custom_search_term = perform_custom_search()
+                            custom_movie_matches = find_movie_info(custom_search_term, movie_data)
+                            if custom_movie_matches:
+                                print(f"Custom search term '{custom_search_term}' matches:")
+                                for i, match in enumerate(custom_movie_matches, start=1):
+                                    print(f"{i}. {match['Name']} ({match['Source']})")
+                                    fuzzy_matches.append((match['Name'], match['Source']))  # Storing custom search fuzzy matches
+                                while True:
+                                    choice = input("Enter the number of the correct match, 's' to skip, or 'r' to restart: ")
+                                    if choice.lower() == 's':
+                                        previous_custom_search_term = custom_search_term
+                                        break  # Skip processing for this scene
+                                    elif choice.lower() == 'r':
+                                        # Restart the script
+                                        main()
+                                    try:
+                                        choice_index = int(choice) - 1
+                                        if 0 <= choice_index < len(custom_movie_matches):
+                                            movie_info = custom_movie_matches[choice_index]
+                                            break
+                                        else:
+                                            print("Invalid choice.")
+                                    except ValueError:
+                                        print("Invalid choice.")
+                                break
                             else:
-                                custom_search_term = input("Enter a new custom search term: ")
-                        else:
-                            custom_search_term = input("Enter a custom search term: ")
-                            
-                        custom_movie_matches = find_movie_info(custom_search_term, movie_data)
-                        if custom_movie_matches:
-                            print(f"Custom search term '{custom_search_term}' matches:")
-                            for i, match in enumerate(custom_movie_matches, start=1):
-                                print(f"{i}. {match['Name']} ({match['Source']})")
-                            choice = input("Enter the number of the correct match, or 's' to skip: ")
-                            if choice.lower() == 's':
+                                print(f"No matching movies found for the custom search term '{custom_search_term}'.")
                                 previous_custom_search_term = custom_search_term
-                                continue  # Skip processing for this scene
+                                break  # Skip processing for this scene
+                        elif choice.lower() == 's':
+                            print("Skipping scene.")
+                            break  # Skip processing for this scene
+                        elif choice.lower() == 'r':
+                            # Restart the script
+                            main()
+                        else:
                             try:
                                 choice_index = int(choice) - 1
-                                if 0 <= choice_index < len(custom_movie_matches):
-                                    movie_info = custom_movie_matches[choice_index]
+                                if 0 <= choice_index < len(movie_matches):
+                                    movie_info = movie_matches[choice_index]
+                                    break
                                 else:
                                     print("Invalid choice.")
-                                    continue
                             except ValueError:
                                 print("Invalid choice.")
-                                continue
-                        else:
-                            print(f"No matching movies found for the custom search term '{custom_search_term}'.")
-                            previous_custom_search_term = custom_search_term
-                            continue  # Skip processing for this scene
-                    elif choice.lower() == 's':
-                        print("Skipping scene.")
-                        continue  # Skip processing for this scene
-                    try:
-                        choice_index = int(choice) - 1
-                        if 0 <= choice_index < len(movie_matches):
-                            movie_info = movie_matches[choice_index]
-                        else:
-                            print("Invalid choice.")
-                            continue
-                    except ValueError:
-                        print("Invalid choice.")
-                        continue
 
                     # Check if movie with same title exists
                     existing_movie_id = find_movie_id(movie_info['Name'])
@@ -342,46 +351,57 @@ def main():
                     print(f"No matching movie found for '{scene['title']}'.")
 
                     # Prompt user to skip or perform a custom search
-                    choice = input("Enter 'c' to perform a custom search or 's' to skip: ")
-                    if choice.lower() == 'c':
-                        custom_search_term = input("Enter a custom search term: ")
-                        custom_movie_matches = find_movie_info(custom_search_term, movie_data)
-                        if custom_movie_matches:
-                            print(f"Custom search term '{custom_search_term}' matches:")
-                            for i, match in enumerate(custom_movie_matches, start=1):
-                                print(f"{i}. {match['Name']} ({match['Source']})")
-                            choice = input("Enter the number of the correct match or 's' to skip: ")
-                            if choice.lower() == 's':
-                                continue  # Skip processing for this scene
-                            try:
-                                choice_index = int(choice) - 1
-                                if 0 <= choice_index < len(custom_movie_matches):
-                                    movie_info = custom_movie_matches[choice_index]
-                                else:
-                                    print("Invalid choice.")
-                                    continue
-                            except ValueError:
-                                print("Invalid choice.")
-                                continue
+                    while True:
+                        choice = input("Enter 'c' to perform a custom search, 's' to skip, or 'r' to restart: ")
+                        if choice.lower() == 'c':
+                            custom_search_term = input("Enter a custom search term: ")
+                            custom_movie_matches = find_movie_info(custom_search_term, movie_data)
+                            if custom_movie_matches:
+                                print(f"Custom search term '{custom_search_term}' matches:")
+                                for i, match in enumerate(custom_movie_matches, start=1):
+                                    print(f"{i}. {match['Name']} ({match['Source']})")
+                                    fuzzy_matches.append((match['Name'], match['Source']))  # Storing custom search fuzzy matches
+                                while True:
+                                    choice = input("Enter the number of the correct match, 's' to skip, or 'r' to restart: ")
+                                    if choice.lower() == 's':
+                                        break  # Skip processing for this scene
+                                    elif choice.lower() == 'r':
+                                        # Restart the script
+                                        main()
+                                    try:
+                                        choice_index = int(choice) - 1
+                                        if 0 <= choice_index < len(custom_movie_matches):
+                                            movie_info = custom_movie_matches[choice_index]
+                                            break
+                                        else:
+                                            print("Invalid choice.")
+                                    except ValueError:
+                                        print("Invalid choice.")
+                                break
+                            else:
+                                print(f"No matching movies found for the custom search term '{custom_search_term}'.")
+                                break  # Skip processing for this scene
+                        elif choice.lower() == 's':
+                            print("Skipping scene.")
+                            break  # Skip processing for this scene
+                        elif choice.lower() == 'r':
+                            # Restart the script
+                            main()
                         else:
-                            print(f"No matching movies found for the custom search term '{custom_search_term}'.")
-                            continue  # Skip processing for this scene
-                    elif choice.lower() == 's':
-                        print("Skipping scene.")
-                        continue  # Skip processing for this scene
-                    else:
-                        print("Invalid choice. Skipping scene.")
-                        continue
+                            print("Invalid choice. Skipping scene.")
+                            break
 
-                # Store the current movie ID for comparison in the next iteration
+                # Store the current movie ID and fuzzy matches for comparison in the next iteration
                 if existing_movie_id:
                     previous_movie_id = existing_movie_id
-        else:
-            print("No scenes found for the specified studio.")
+                previous_fuzzy_matches = fuzzy_matches  # Storing fuzzy matches for comparison in the next iteration
+
     else:
         print("Studio 'Movie' not found.")
 
 # Entry point
 if __name__ == "__main__":
     main()
+
+
 

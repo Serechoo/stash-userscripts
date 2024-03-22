@@ -8,6 +8,7 @@ query AllMovies {
         id
         name
         url
+        aliases
     }
 }
 """
@@ -33,6 +34,7 @@ mutation MovieUpdate($id: ID!, $name: String!, $date: String!, $synopsis: String
         synopsis: $synopsis
         front_image: $front_image
         back_image: $back_image
+        aliases: "Organized"
     }) {
         id
     }
@@ -64,7 +66,12 @@ if __name__ == "__main__":
         movie_id = movie["id"]
         movie_name = movie["name"]
         movie_url = movie["url"]
+        movie_aliases = movie.get("aliases", [])
         
+        if "Organized" in movie_aliases:
+            log.warning(f"Skipping movie '{movie_name}' as it is already organized.")
+            continue
+
         if not movie_url:
             log.warning(f"Skipping movie '{movie_name}' due to blank URL.")
             continue
@@ -88,7 +95,8 @@ if __name__ == "__main__":
             "date": date,
             "synopsis": synopsis,
             "front_image": front_image,
-            "back_image": back_image
+            "back_image": back_image,
+            "aliases": ["Organized"]  # Adding "Organized" alias
         }
         update_response = send_query(movie_update_mutation, variables=update_variables)
         if "errors" in update_response:
