@@ -135,7 +135,8 @@ def handle_movie_matches(movie_matches, group_scenes, movie_data):
 
 def update_scenes_with_selected_movie(selected_movie, group_scenes):
     movie_name = selected_movie['Name']
-    movie_id = find_or_create_movie(movie_name)
+    movie_url = selected_movie['Source']  # Assuming 'Source' contains the movie URL
+    movie_id = find_or_create_movie(movie_name, movie_url)  # Pass both movie name and URL
     if movie_id:
         for scene in group_scenes:
             if not update_scenes_with_movie(scene['id'], movie_id):
@@ -144,18 +145,18 @@ def update_scenes_with_selected_movie(selected_movie, group_scenes):
     else:
         print("Failed to find or create the selected movie.")
 
-def find_or_create_movie(movie_name):
+
+def find_or_create_movie(movie_name, movie_url):
     existing_movie_id = find_movie_id(movie_name)
     if existing_movie_id:
         return existing_movie_id
     else:
-        # Assuming the URL needs to be retrieved for movie creation
-        movie_url = input(f"Enter the URL for movie '{movie_name}': ")
         created_movie_id, success = create_movie(movie_name, movie_url)
         if success:
             return created_movie_id
         else:
-             return None
+            return None
+
 
 # Function to find movie information with fuzzy matching and lexical sorting
 def find_movie_info(movie_name, movie_data):
@@ -426,9 +427,15 @@ def handle_movie_matches(movie_matches, group_scenes, movie_data):
             choice_index = int(choice) - 1
             if 0 <= choice_index < len(movie_matches):
                 selected_movie = movie_matches[choice_index]
+                # Check if the selected movie has a URL
+                if 'Source' in selected_movie:
+                    movie_url = selected_movie['Source']
+                else:
+                    movie_url = input(f"Enter the URL for movie '{selected_movie['Name']}': ")
+                selected_movie['Source'] = movie_url  # Add or update the URL in the selected movie
                 update_scenes_with_selected_movie(selected_movie, group_scenes)
                 # After selecting the movie, update scenes with the selected movie
-                movie_id = find_or_create_movie(selected_movie['Name'])
+                movie_id = find_or_create_movie(selected_movie['Name'], movie_url)  # Pass the movie URL
                 if movie_id:
                     for scene in group_scenes:
                         if not update_scenes_with_movie(scene['id'], movie_id):
