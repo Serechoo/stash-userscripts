@@ -36,29 +36,23 @@ def find_studio_id():
 # Function to find scenes
 def find_scenes(studio_id):
     find_scenes_url = "http://localhost:9999/graphql"
-    query_string = """
-        query FindScenes {
+    query_string = f"""
+        query FindScenes {{
             findScenes(
-                filter: { per_page: -1 },
-                scene_filter: { studios: { value: "%s", modifier: EQUALS } }
-            ) {
-                scenes {
+                filter: {{ per_page: -1 }},
+                scene_filter: {{ studios: {{ value: "{studio_id}", modifier: EQUALS }} }}
+            ) {{
+                scenes {{
                     id
                     title
-                    files {
+                    files {{
                         id
                         path
-                    }
-                    movies {
-                        movie {
-                            id
-                            name
-                        }
-                    }
-                }
-            }
-        }
-    """ % studio_id
+                    }}
+                }}
+            }}
+        }}
+    """
     find_scenes_payload = {"query": query_string}
 
     try:
@@ -80,7 +74,6 @@ def find_scenes(studio_id):
         print(f"Error parsing JSON response: {e}")
         return None
 
-
 def process_scenes(studio_id, scenes, movie_data):
     global scene_groups  # Declare scene_groups as global
     
@@ -88,12 +81,6 @@ def process_scenes(studio_id, scenes, movie_data):
 
     for current_scene_index, scene in enumerate(scenes):
         print(f"Processing scene: {scene['title']}")
-        
-        # Check if the scene is already attached to a movie
-        if scene['movies']:
-            print("Scene is already attached to a movie. Skipping.")
-            continue
-        
         # Extract the subdirectory from the file path
         file_path = scene.get('files', [{}])[0].get('path', '')
         subdirectory = os.path.dirname(file_path)
@@ -221,7 +208,7 @@ def create_movie(movie_name, movie_url):
             else:
                 print("Error: Unable to retrieve movie ID.")
         else:
-            print("Error creating movie:", result.get("errors", "Attempting to create movie..."))
+            print("Error creating movie:", result.get("errors", "Unknown Error"))
     except requests.exceptions.RequestException as e:
         print(f"Error creating movie: {e}")
     except ValueError as e:
