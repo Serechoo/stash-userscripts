@@ -1,0 +1,13 @@
+name: Movie-Fy Scene Index Updater
+description: Update scene_index for scenes in movies that correspond with scene titles.
+version: 0.1
+url: https://github.com/Serechoo/stash-userscripts
+exec:
+  - python
+  - "{pluginDir}/Movie-Fy Scene Index Updater.py"
+interface: raw
+tasks:
+  - name: 'Update Scene Indexes'
+    description: Updates scene indexes on the server
+    defaultArgs:
+      server_url: "http://localhost:9999/graphql"
